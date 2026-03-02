@@ -1,0 +1,10 @@
+{
+  "title": "Wss",
+  "description": "Wss endpoints in the API reference URL structure.",
+  "icon": "Radio",
+  "pages": [
+    "market",
+    "sports",
+    "user"
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "title": "Data",
+  "description": "Data endpoints in the API reference URL structure.",
+  "icon": "Activity",
+  "pages": [
+    "get-midpoint-price",
+    "get-server-time"
+  ]
+}

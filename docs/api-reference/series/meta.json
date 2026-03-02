@@ -1,0 +1,9 @@
+{
+  "title": "Series",
+  "description": "Series endpoints in the API reference URL structure.",
+  "icon": "List",
+  "pages": [
+    "get-series-by-id",
+    "list-series"
+  ]
+}

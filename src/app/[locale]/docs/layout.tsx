@@ -48,9 +48,9 @@ export default async function Layout({ params, children }: LayoutProps<'/[locale
               icon: <BookOpenIcon className="size-4" />,
             },
             {
-              title: 'Developer Guide',
-              description: 'API reference and details',
-              url: '/docs/developers',
+              title: 'API Reference',
+              description: 'REST and WebSocket contracts',
+              url: '/docs/api-reference',
               icon: <CodeIcon className="size-4" />,
             },
             ...(JSON.parse(process.env.FORK_OWNER_GUIDE || 'false')

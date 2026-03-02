@@ -1,0 +1,10 @@
+{
+  "title": "Misc",
+  "description": "Misc endpoints in the API reference URL structure.",
+  "icon": "Package",
+  "pages": [
+    "get-live-volume-for-an-event",
+    "get-open-interest",
+    "get-total-markets-a-user-has-traded"
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "title": "Comments",
+  "description": "Comments endpoints in the API reference URL structure.",
+  "icon": "MessageSquare",
+  "pages": [
+    "get-comments-by-comment-id",
+    "get-comments-by-user-address",
+    "list-comments"
+  ]
+}

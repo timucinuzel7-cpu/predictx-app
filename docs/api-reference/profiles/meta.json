@@ -1,0 +1,8 @@
+{
+  "title": "Profiles",
+  "description": "Profiles endpoints in the API reference URL structure.",
+  "icon": "User",
+  "pages": [
+    "get-public-profile-by-wallet-address"
+  ]
+}
