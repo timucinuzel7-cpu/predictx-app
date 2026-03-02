@@ -1,6 +1,6 @@
 {
   "title": "Market Data",
-  "description": "Market Data endpoints in the API reference URL structure.",
+  "description": "Market data endpoints for books, spreads, prices, and fee/tick metadata.",
   "icon": "CandlestickChart",
   "pages": [
     "get-fee-rate",

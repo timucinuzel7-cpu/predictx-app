@@ -1,6 +1,6 @@
 {
   "title": "Core",
-  "description": "Core endpoints in the API reference URL structure.",
+  "description": "Core analytics endpoints for positions, trades, and leaderboard views.",
   "icon": "Database",
   "pages": [
     "get-closed-positions-for-a-user",

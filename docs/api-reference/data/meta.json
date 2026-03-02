@@ -1,6 +1,6 @@
 {
   "title": "Data",
-  "description": "Data endpoints in the API reference URL structure.",
+  "description": "Utility data endpoints such as server time and midpoint price.",
   "icon": "Activity",
   "pages": [
     "get-midpoint-price",

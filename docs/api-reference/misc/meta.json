@@ -1,6 +1,6 @@
 {
   "title": "Misc",
-  "description": "Misc endpoints in the API reference URL structure.",
+  "description": "Supplementary endpoints like open interest and event volume snapshots.",
   "icon": "Package",
   "pages": [
     "get-live-volume-for-an-event",

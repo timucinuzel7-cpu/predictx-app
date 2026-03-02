@@ -1,6 +1,6 @@
 {
   "title": "Series",
-  "description": "Series endpoints in the API reference URL structure.",
+  "description": "Series endpoints for available feeds and series metadata.",
   "icon": "List",
   "pages": [
     "get-series-by-id",

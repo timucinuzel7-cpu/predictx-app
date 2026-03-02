@@ -109,7 +109,7 @@ export function WebSocketPlayground({
           id: nextLogIdRef.current++,
           level,
           message: entryMessage,
-          timestamp: Date.now(),
+          timestamp: 0,
         },
       ]
 

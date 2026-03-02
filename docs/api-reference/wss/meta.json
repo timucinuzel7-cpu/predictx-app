@@ -1,6 +1,6 @@
 {
   "title": "Wss",
-  "description": "Wss endpoints in the API reference URL structure.",
+  "description": "WebSocket channels for market, user, and sports live updates.",
   "icon": "Radio",
   "pages": [
     "market",

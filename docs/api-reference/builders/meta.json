@@ -1,6 +1,6 @@
 {
   "title": "Builders",
-  "description": "Builders endpoints in the API reference URL structure.",
+  "description": "Builder performance endpoints including leaderboard and volume series.",
   "icon": "Hammer",
   "pages": [
     "get-aggregated-builder-leaderboard",

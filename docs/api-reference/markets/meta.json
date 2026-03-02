@@ -1,6 +1,6 @@
 {
   "title": "Markets",
-  "description": "Markets endpoints in the API reference URL structure.",
+  "description": "Market discovery endpoints for listing and fetching market details.",
   "icon": "ChartNoAxesCombined",
   "pages": [
     "get-market-by-id",

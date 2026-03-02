@@ -1,6 +1,6 @@
 {
   "title": "Trade",
-  "description": "Trade endpoints in the API reference URL structure.",
+  "description": "Trading endpoints for creating, managing, and canceling orders.",
   "icon": "ArrowDownUp",
   "pages": [
     "cancel-all-orders",
