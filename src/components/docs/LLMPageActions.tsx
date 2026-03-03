@@ -1,7 +1,7 @@
 'use client'
 
 import { CheckIcon, ChevronDownIcon, CopyIcon, FileTextIcon } from 'lucide-react'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -20,6 +20,10 @@ interface BrandIconProps {
 
 function toAbsoluteUrl(url: string) {
   if (url.startsWith('http://') || url.startsWith('https://')) {
+    return url
+  }
+
+  if (typeof window === 'undefined') {
     return url
   }
 
@@ -103,7 +107,7 @@ export function ViewOptions({ markdownUrl }: ViewOptionsProps) {
   const [copied, setCopied] = useState(false)
   const [loading, setLoading] = useState(false)
   const [markdownContent, setMarkdownContent] = useState<string | null>(null)
-  const absoluteMarkdownUrl = useMemo(() => toAbsoluteUrl(markdownUrl), [markdownUrl])
+  const absoluteMarkdownUrl = toAbsoluteUrl(markdownUrl)
 
   useEffect(() => {
     let cancelled = false

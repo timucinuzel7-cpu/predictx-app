@@ -1,3 +1,5 @@
+'use cache'
+
 import type { MDXComponents } from 'mdx/types'
 import type { Metadata, Route } from 'next'
 import type { SupportedLocale } from '@/i18n/locales'
