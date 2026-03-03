@@ -1,7 +1,7 @@
 'use client'
 
 import { CheckIcon, ChevronDownIcon, CopyIcon, FileTextIcon } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -66,51 +66,6 @@ async function copyText(text: string) {
   }
 }
 
-async function copyMarkdown(markdownUrl: string, absoluteMarkdownUrl: string) {
-  const markdownPromise = fetch(markdownUrl, {
-    headers: {
-      Accept: 'text/markdown',
-    },
-  }).then((response) => {
-    if (!response.ok) {
-      throw new Error(`Failed to fetch markdown (${response.status})`)
-    }
-    return response.text()
-  })
-
-  if (
-    typeof navigator !== 'undefined'
-    && navigator.clipboard?.write
-    && typeof ClipboardItem !== 'undefined'
-  ) {
-    try {
-      const item = new ClipboardItem({
-        'text/plain': markdownPromise.then(markdown => new Blob([markdown], { type: 'text/plain' })),
-      })
-      await navigator.clipboard.write([item])
-      return true
-    }
-    catch {
-      // Fallback below.
-    }
-  }
-
-  try {
-    const markdown = await markdownPromise
-    await copyText(markdown)
-    return true
-  }
-  catch {
-    try {
-      await copyText(absoluteMarkdownUrl)
-      return true
-    }
-    catch {
-      return false
-    }
-  }
-}
-
 function OpenAIIcon({ className }: BrandIconProps) {
   return (
     <svg aria-hidden="true" viewBox="0 0 24 24" className={className}>
@@ -147,6 +102,39 @@ function CursorIcon({ className }: BrandIconProps) {
 export function ViewOptions({ markdownUrl }: ViewOptionsProps) {
   const [copied, setCopied] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [markdownContent, setMarkdownContent] = useState<string | null>(null)
+  const absoluteMarkdownUrl = useMemo(() => toAbsoluteUrl(markdownUrl), [markdownUrl])
+
+  useEffect(() => {
+    let cancelled = false
+
+    async function preloadMarkdown() {
+      try {
+        const response = await fetch(markdownUrl, {
+          headers: {
+            Accept: 'text/markdown',
+          },
+        })
+
+        if (!response.ok) {
+          return
+        }
+
+        const markdown = await response.text()
+        if (!cancelled) {
+          setMarkdownContent(markdown)
+        }
+      }
+      catch {
+        //
+      }
+    }
+
+    void preloadMarkdown()
+    return () => {
+      cancelled = true
+    }
+  }, [markdownUrl])
 
   async function onCopy() {
     if (loading) {
@@ -154,18 +142,33 @@ export function ViewOptions({ markdownUrl }: ViewOptionsProps) {
     }
 
     setLoading(true)
-    const absoluteMarkdownUrl = toAbsoluteUrl(markdownUrl)
     try {
-      const success = await copyMarkdown(markdownUrl, absoluteMarkdownUrl)
-      if (!success) {
-        return
+      const primaryText = markdownContent ?? absoluteMarkdownUrl
+      let success = false
+
+      try {
+        await copyText(primaryText)
+        success = true
+      }
+      catch {
+        if (primaryText !== absoluteMarkdownUrl) {
+          try {
+            await copyText(absoluteMarkdownUrl)
+            success = true
+          }
+          catch {
+            success = false
+          }
+        }
       }
 
-      setCopied(true)
-      window.setTimeout(() => setCopied(false), 1800)
+      if (success) {
+        setCopied(true)
+        window.setTimeout(() => setCopied(false), 1800)
+      }
     }
     catch {
-      // No-op: keep UI stable when copy is blocked entirely by the platform.
+      //
     }
     finally {
       setLoading(false)
