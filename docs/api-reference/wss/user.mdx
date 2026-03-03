@@ -5,5 +5,15 @@ description: "Subscribe to authenticated user updates over WebSocket."
 
 ## WebSocket Playground
 
-<WebSocketPlayground endpoint="wss://ws-subscriptions-clob.kuest.com" />
-
+<WebSocketPlayground
+  endpoint="wss://ws-subscriptions-clob.kuest.com/ws/user"
+  defaultMessage={`{
+  "type": "user",
+  "markets": ["<condition_id>"],
+  "auth": {
+    "apikey": "<api_key>",
+    "secret": "<api_secret>",
+    "passphrase": "<api_passphrase>"
+  }
+}`}
+/>

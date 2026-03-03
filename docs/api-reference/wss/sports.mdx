@@ -5,5 +5,15 @@ description: "Subscribe to live activity, comments, and price updates over WebSo
 
 ## WebSocket Playground
 
-<WebSocketPlayground endpoint="wss://ws-live-data.kuest.com" />
-
+<WebSocketPlayground
+  endpoint="wss://ws-live-data.kuest.com"
+  defaultMessage={`{
+  "action": "subscribe",
+  "subscriptions": [
+    {
+      "topic": "activity",
+      "type": "orders_matched"
+    }
+  ]
+}`}
+/>
