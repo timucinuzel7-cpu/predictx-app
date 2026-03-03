@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server'
-import { resolveServiceUrls } from '@/lib/service-urls'
 
 type Interval = '5m' | '15m' | '1h' | '4h' | '1d'
 type Source = 'chainlink' | 'massive'
@@ -63,7 +62,7 @@ interface PriceReferenceHistoryResponse {
   rows?: PriceReferenceHistoryRow[]
 }
 
-const PRICE_REFERENCE_BASE_URL = resolveServiceUrls().priceReferenceUrl
+const PRICE_REFERENCE_BASE_URL = process.env.PRICE_REFERENCE_URL!
 const SERIES_MAP_TTL_MS = 5 * 60 * 1000
 
 let seriesMapBySlugCache = new Map<string, SeriesMapItem>()

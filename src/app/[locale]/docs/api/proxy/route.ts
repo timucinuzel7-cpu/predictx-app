@@ -1,16 +1,23 @@
 import { openapi } from '@/lib/openapi'
-import { resolveServiceUrls, toUrlOrigin } from '@/lib/service-urls'
 
-const serviceUrls = resolveServiceUrls()
+function toUrlOrigin(url: string): string | null {
+  try {
+    return new URL(url).origin
+  }
+  catch {
+    return null
+  }
+}
 
 const allowedOrigins = [
-  serviceUrls.clobUrl,
-  serviceUrls.dataUrl,
-  serviceUrls.relayerUrl,
-  serviceUrls.createMarketUrl,
-  serviceUrls.communityUrl,
-  serviceUrls.priceReferenceUrl,
+  process.env.CLOB_URL,
+  process.env.DATA_URL,
+  process.env.RELAYER_URL,
+  process.env.CREATE_MARKET_URL,
+  process.env.COMMUNITY_URL,
+  process.env.PRICE_REFERENCE_URL,
 ]
+  .filter((url): url is string => Boolean(url))
   .map(toUrlOrigin)
   .filter((origin): origin is string => Boolean(origin))
 

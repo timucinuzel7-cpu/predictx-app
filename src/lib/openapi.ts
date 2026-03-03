@@ -1,7 +1,6 @@
 import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 import { createOpenAPI } from 'fumadocs-openapi/server'
-import { resolveServiceUrls } from '@/lib/service-urls'
 
 type SchemaServer = Record<string, unknown> & {
   url?: string
@@ -44,7 +43,6 @@ async function readSchema(schemaPath: string): Promise<OpenApiSchema> {
 
 export const openapi = createOpenAPI({
   input: async () => {
-    const serviceUrls = resolveServiceUrls()
     const [
       clobSchema,
       clobExtendedSchema,
@@ -64,13 +62,13 @@ export const openapi = createOpenAPI({
     ])
 
     return {
-      'clob': applyServerUrl(clobSchema, serviceUrls.clobUrl),
-      'clob-extended': applyServerUrl(clobExtendedSchema, serviceUrls.clobUrl),
-      'create-market': applyServerUrl(createMarketSchema, serviceUrls.createMarketUrl),
-      'community': applyServerUrl(communitySchema, serviceUrls.communityUrl),
-      'data-api': applyServerUrl(dataApiSchema, serviceUrls.dataUrl),
-      'price-reference': applyServerUrl(priceReferenceSchema, serviceUrls.priceReferenceUrl),
-      'relayer': applyServerUrl(relayerSchema, serviceUrls.relayerUrl),
+      'clob': applyServerUrl(clobSchema, process.env.CLOB_URL!),
+      'clob-extended': applyServerUrl(clobExtendedSchema, process.env.CLOB_URL!),
+      'create-market': applyServerUrl(createMarketSchema, process.env.CREATE_MARKET_URL!),
+      'community': applyServerUrl(communitySchema, process.env.COMMUNITY_URL!),
+      'data-api': applyServerUrl(dataApiSchema, process.env.DATA_URL!),
+      'price-reference': applyServerUrl(priceReferenceSchema, process.env.PRICE_REFERENCE_URL!),
+      'relayer': applyServerUrl(relayerSchema, process.env.RELAYER_URL!),
     }
   },
   proxyUrl: '/docs/api/proxy',
