@@ -4,8 +4,8 @@ import { DocsLayout } from 'fumadocs-ui/layouts/docs'
 import { BookOpenIcon, CodeIcon, GitForkIcon, HomeIcon } from 'lucide-react'
 import { setRequestLocale } from 'next-intl/server'
 import SiteLogoIcon from '@/components/SiteLogoIcon'
-import { getDocsSidebarTree } from '@/lib/docs/sidebar-tree'
 import { withLocalePrefix } from '@/lib/locale-path'
+import { source } from '@/lib/source'
 import { loadRuntimeThemeState } from '@/lib/theme-settings'
 
 interface DocsSlugLayoutProps {
@@ -14,11 +14,10 @@ interface DocsSlugLayoutProps {
 }
 
 export default async function Layout({ params, children }: DocsSlugLayoutProps) {
-  const { locale, slug } = await params
+  const { locale } = await params
   setRequestLocale(locale)
   const runtimeTheme = await loadRuntimeThemeState()
   const site = runtimeTheme.site
-  const docsTree = getDocsSidebarTree(slug)
   const currentLocale = locale as SupportedLocale
 
   function docsPath(pathname: string) {
@@ -71,7 +70,7 @@ export default async function Layout({ params, children }: DocsSlugLayoutProps) 
             : []),
         ],
       }}
-      tree={docsTree}
+      tree={source.pageTree}
       themeSwitch={{
         mode: 'light-dark-system',
       }}
