@@ -4,13 +4,13 @@ description: Earn a share of trading fees when people trade through your link
 icon: Link
 ---
 
+import { DiscordLink, IfDiscordLink } from '@/components/docs/DiscordLink'
 
-
-{process.env.NEXT_PUBLIC_DISCORD_LINK && (
+<IfDiscordLink>
 <Callout>
-  Need Help? Reach out on <a href={process.env.NEXT_PUBLIC_DISCORD_LINK} rel="noopener noreferrer" target="_blank">Discord</a> and the team will walk you through the affiliate tools.
+  Need Help? Reach out on <DiscordLink>Discord</DiscordLink> and the team will walk you through the affiliate tools.
 </Callout>
-)}
+</IfDiscordLink>
 
 ## Share your referral link
 

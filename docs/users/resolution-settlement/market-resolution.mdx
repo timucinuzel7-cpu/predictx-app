@@ -4,13 +4,15 @@ description: Learn how markets are resolved
 icon: CheckCircle
 ---
 
+import { DiscordLink, IfDiscordLink } from '@/components/docs/DiscordLink'
+import { SiteName } from '@/components/docs/SiteName'
 import { Steps, Step } from 'fumadocs-ui/components/steps'
 
-{process.env.NEXT_PUBLIC_DISCORD_LINK && (
+<IfDiscordLink>
 <Callout>
-  Need Help? For assistance, reach out to us on <a href={process.env.NEXT_PUBLIC_DISCORD_LINK} rel="noopener noreferrer" target="_blank">Discord</a>.
+  Need Help? For assistance, reach out to us on <DiscordLink>Discord</DiscordLink>.
 </Callout>
-)}
+</IfDiscordLink>
 
 ## What is Market Resolution?
 
@@ -32,7 +34,7 @@ Resolution determines which traders win and which lose.
     ### Outcome reported
 
     Trusted sources and on-chain oracles feed the outcome into
-    {process.env.NEXT_PUBLIC_SITE_NAME}. Moderators confirm accuracy and flag
+    <SiteName />. Moderators confirm accuracy and flag
     any disputes.
   </Step>
   <Step>

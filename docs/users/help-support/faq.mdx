@@ -4,13 +4,14 @@ description: Frequently asked questions about the platform
 icon: HelpCircle
 ---
 
+import { DiscordLink, IfDiscordLink } from '@/components/docs/DiscordLink'
 import { Accordions, Accordion } from 'fumadocs-ui/components/accordion'
 
-{process.env.NEXT_PUBLIC_DISCORD_LINK && (
+<IfDiscordLink>
 <Callout>
-  Need Help? For assistance, reach out to us on <a href={process.env.NEXT_PUBLIC_DISCORD_LINK} rel="noopener noreferrer" target="_blank">Discord</a>.
+  Need Help? For assistance, reach out to us on <DiscordLink>Discord</DiscordLink>.
 </Callout>
-)}
+</IfDiscordLink>
 
 <Accordions type="single" collapsible>
   <Accordion title="What fees do I pay when I trade?" value="fees">

@@ -4,15 +4,18 @@ description: Get help while using the platform
 icon: LifeBuoy
 ---
 
-{process.env.NEXT_PUBLIC_DISCORD_LINK && (
+import { DiscordLink, IfDiscordLink } from '@/components/docs/DiscordLink'
+import { SiteName } from '@/components/docs/SiteName'
+
+<IfDiscordLink>
 <Callout>
-  Need Help? For assistance, reach out to us on <a href={process.env.NEXT_PUBLIC_DISCORD_LINK} rel="noopener noreferrer" target="_blank">Discord</a>.
+  Need Help? For assistance, reach out to us on <DiscordLink>Discord</DiscordLink>.
 </Callout>
-)}
+</IfDiscordLink>
 
 ## Support Channels
 
-There are several ways to get help while using {process.env.NEXT_PUBLIC_SITE_NAME}:
+There are several ways to get help while using <SiteName />:
 
 - **Discord community** – fastest way to get peer-to-peer help and updates
 - **FAQ page** – quick answers to common questions

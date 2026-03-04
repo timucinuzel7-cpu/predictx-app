@@ -4,13 +4,14 @@ description: Add an extra layer of security to your account
 icon: Shield
 ---
 
+import { DiscordLink, IfDiscordLink } from '@/components/docs/DiscordLink'
 import { Steps, Step } from 'fumadocs-ui/components/steps'
 
-{process.env.NEXT_PUBLIC_DISCORD_LINK && (
+<IfDiscordLink>
 <Callout>
-  Need Help? For assistance, reach out to us on <a href={process.env.NEXT_PUBLIC_DISCORD_LINK} rel="noopener noreferrer" target="_blank">Discord</a>.
+  Need Help? For assistance, reach out to us on <DiscordLink>Discord</DiscordLink>.
 </Callout>
-)}
+</IfDiscordLink>
 
 ## Enable 2FA
 

@@ -4,13 +4,15 @@ description: Orders, trades, deposits, withdrawals — and CSV export
 icon: Clock
 ---
 
+import { DiscordLink, IfDiscordLink } from '@/components/docs/DiscordLink'
+import { SiteName } from '@/components/docs/SiteName'
 import { Steps, Step } from 'fumadocs-ui/components/steps'
 
-{process.env.NEXT_PUBLIC_DISCORD_LINK && (
+<IfDiscordLink>
 <Callout>
-  Need Help? For assistance, reach out to us on <a href={process.env.NEXT_PUBLIC_DISCORD_LINK} rel="noopener noreferrer" target="_blank">Discord</a>.
+  Need Help? For assistance, reach out to us on <DiscordLink>Discord</DiscordLink>.
 </Callout>
-)}
+</IfDiscordLink>
 
 ## Tabs
 
@@ -34,7 +36,7 @@ Download your account history for records or taxes:
   <Step>
     ### Click Export CSV
 
-    {process.env.NEXT_PUBLIC_SITE_NAME} generates a CSV containing the rows you
+    <SiteName /> generates a CSV containing the rows you
     currently see in the table.
   </Step>
   <Step>

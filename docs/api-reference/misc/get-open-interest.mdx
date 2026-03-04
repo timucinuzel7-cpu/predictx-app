@@ -4,8 +4,11 @@ description: "Returns open interest for each market."
 _openapi:
   method: GET
 ---
+
+import { SiteName } from '@/components/docs/SiteName'
+
 <Callout type="info">
-Totals mirror the cached {process.env.NEXT_PUBLIC_SITE_NAME} balances, so extremely new markets may take a sync or two to appear.
+Totals mirror the cached <SiteName /> balances, so extremely new markets may take a sync or two to appear.
 </Callout>
 
 Call <code>{process.env.DATA_URL}/oi</code> to retrieve the notional value locked in each market. Without filters the endpoint returns every cached market; include a `market` CSV query to narrow the scope.

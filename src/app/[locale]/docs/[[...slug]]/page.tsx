@@ -13,7 +13,9 @@ import { PlatformShareDisplay } from '@/app/[locale]/docs/_components/PlatformSh
 import { TradingFeeDisplay } from '@/app/[locale]/docs/_components/TradingFeeDisplay'
 import { WebSocketPlayground } from '@/app/[locale]/docs/_components/WebSocketPlayground'
 import { APIPage } from '@/components/docs/APIPage'
+import { DiscordLink, IfDiscordLink } from '@/components/docs/DiscordLink'
 import { ViewOptions } from '@/components/docs/LLMPageActions'
+import { SiteName } from '@/components/docs/SiteName'
 import { withLocalePrefix } from '@/lib/locale-path'
 import { source } from '@/lib/source'
 import { loadRuntimeThemeState } from '@/lib/theme-settings'
@@ -27,6 +29,9 @@ function getMDXComponents(components?: MDXComponents): MDXComponents {
     PlatformShareDisplay,
     FeeCalculationExample,
     WebSocketPlayground,
+    DiscordLink,
+    IfDiscordLink,
+    SiteName,
     ...components,
   }
 }

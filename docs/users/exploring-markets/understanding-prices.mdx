@@ -4,11 +4,13 @@ description: Learn how prices reflect probabilities
 icon: DollarSign
 ---
 
-{process.env.NEXT_PUBLIC_DISCORD_LINK && (
+import { DiscordLink, IfDiscordLink } from '@/components/docs/DiscordLink'
+
+<IfDiscordLink>
 <Callout>
-  Need Help? For assistance, reach out to us on <a href={process.env.NEXT_PUBLIC_DISCORD_LINK} rel="noopener noreferrer" target="_blank">Discord</a>.
+  Need Help? For assistance, reach out to us on <DiscordLink>Discord</DiscordLink>.
 </Callout>
-)}
+</IfDiscordLink>
 
 ## Price as Probability
 

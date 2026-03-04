@@ -4,7 +4,10 @@ description: "Returns cached trade fills with filters for user, market, paginati
 _openapi:
   method: GET
 ---
-<code>{process.env.DATA_URL}/trades</code> surfaces every fill captured by the {process.env.NEXT_PUBLIC_SITE_NAME} orderbook subgraph. You can query by wallet or by a batch of markets.
+
+import { SiteName } from '@/components/docs/SiteName'
+
+<code>{process.env.DATA_URL}/trades</code> surfaces every fill captured by the <SiteName /> orderbook subgraph. You can query by wallet or by a batch of markets.
 
 ## Parameters worth noting
 

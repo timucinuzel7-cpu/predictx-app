@@ -4,13 +4,15 @@ description: Learn how markets work
 icon: BarChart
 ---
 
+import { DiscordLink, IfDiscordLink } from '@/components/docs/DiscordLink'
+import { SiteName } from '@/components/docs/SiteName'
 import { Steps, Step } from 'fumadocs-ui/components/steps'
 
-{process.env.NEXT_PUBLIC_DISCORD_LINK && (
+<IfDiscordLink>
 <Callout>
-  Need Help? For assistance, reach out to us on <a href={process.env.NEXT_PUBLIC_DISCORD_LINK} rel="noopener noreferrer" target="_blank">Discord</a>.
+  Need Help? For assistance, reach out to us on <DiscordLink>Discord</DiscordLink>.
 </Callout>
-)}
+</IfDiscordLink>
 
 ## What is a Market?
 
@@ -27,7 +29,7 @@ Each market has:
 
 ## How Probabilities Work
 
-Prices in {process.env.NEXT_PUBLIC_SITE_NAME} are expressed as probabilities:
+Prices in <SiteName /> are expressed as probabilities:
 
 - A price of **0.65 (65%)** means the market currently estimates a **65% chance** that the outcome will happen.
 - If the outcome resolves as true, each share is worth **$1**.

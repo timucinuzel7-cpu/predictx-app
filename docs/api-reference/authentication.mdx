@@ -3,7 +3,9 @@ title: Authentication
 description: L1 and L2 authentication model, required headers, and auth playgrounds.
 ---
 
-{process.env.NEXT_PUBLIC_SITE_NAME} uses a two-tier authentication flow:
+import { SiteName } from '@/components/docs/SiteName'
+
+<SiteName /> uses a two-tier authentication flow:
 
 - **L1 (wallet signature)** for creating or deriving API keys.
 - **L2 (API credentials)** for authenticated trading and account endpoints.

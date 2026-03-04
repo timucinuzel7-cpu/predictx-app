@@ -4,19 +4,21 @@ description: What to do if you disagree with a market resolution
 icon: AlertTriangle
 ---
 
+import { DiscordLink, IfDiscordLink } from '@/components/docs/DiscordLink'
+import { SiteName } from '@/components/docs/SiteName'
 import { Steps, Step } from 'fumadocs-ui/components/steps'
 
-{process.env.NEXT_PUBLIC_DISCORD_LINK && (
+<IfDiscordLink>
 <Callout>
-  Need Help? For assistance, reach out to us on <a href={process.env.NEXT_PUBLIC_DISCORD_LINK} rel="noopener noreferrer" target="_blank">Discord</a>.
+  Need Help? For assistance, reach out to us on <DiscordLink>Discord</DiscordLink>.
 </Callout>
-)}
+</IfDiscordLink>
 
 ## Disputing a Resolution
 
 In rare cases, you may believe a market was resolved incorrectly.
 
-{process.env.NEXT_PUBLIC_SITE_NAME} provides a **dispute process** to ensure fairness.
+<SiteName /> provides a **dispute process** to ensure fairness.
 
 ---
 

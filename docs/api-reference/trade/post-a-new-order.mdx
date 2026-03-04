@@ -4,7 +4,10 @@ description: "Create a new order."
 _openapi:
   method: POST
 ---
-Submit a new order to the {process.env.NEXT_PUBLIC_SITE_NAME} central limit order book. Orders are accepted for matching immediately; validation happens synchronously and the response tells you whether the request was persisted.
+
+import { SiteName } from '@/components/docs/SiteName'
+
+Submit a new order to the <SiteName /> central limit order book. Orders are accepted for matching immediately; validation happens synchronously and the response tells you whether the request was persisted.
 
 <Callout type="info">
 All order placement calls require the L2 authentication headers: `KUEST_ADDRESS`, `KUEST_SIGNATURE`, `KUEST_TIMESTAMP`, `KUEST_API_KEY`, and `KUEST_PASSPHRASE`. Review how to obtain them in the [`Authentication overview`](/docs/api-reference/authentication) or use the managed console at <a href="https://auth.kuest.com" target="_blank" rel="noreferrer">auth.kuest.com</a>.
