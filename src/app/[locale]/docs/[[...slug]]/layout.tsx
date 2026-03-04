@@ -75,7 +75,7 @@ export default async function Layout({ params, children }: DocsSlugLayoutProps) 
           ...(process.env.FORK_OWNER_GUIDE === 'true'
             ? [
                 {
-                  title: 'Fork Owner Guide',
+                  title: 'Owner Guide',
                   description: 'For Entrepeneurs',
                   url: docsPath('/docs/owners'),
                   icon: <GitForkIcon className="size-4" />,
