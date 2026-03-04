@@ -5,12 +5,12 @@
   "root": true,
   "pages": [
     "index",
-    "---Launch workflow---",
+    "---[CheckSquare]Launch Workflow---",
     "launch-checklist",
-    "---Configuration---",
+    "---[Settings]Configuration---",
     "environment-variables",
     "cloudflare-reverse-proxy",
-    "---Integrations---",
+    "---[Sparkles]Integrations---",
     "market-context-generator"
   ]
 }

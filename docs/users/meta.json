@@ -5,17 +5,17 @@
   "root": true,
   "pages": [
     "index",
-    "---Getting Started---",
+    "---[CirclePlay]Getting Started---",
     "...getting-started",
-    "---Trading Basics---",
+    "---[Compass]Trading Basics---",
     "...exploring-markets",
-    "---Portfolio & Settings---",
+    "---[UserCircle]Portfolio & Settings---",
     "...my-account",
-    "---Resolution & Settlement---",
+    "---[Gavel]Resolution & Settlement---",
     "...resolution-settlement",
-    "---Fees & Limits---",
+    "---[Coins]Fees & Limits---",
     "...fees-limits",
-    "---Help & Support---",
+    "---[LifeBuoy]Help & Support---",
     "...help-support"
   ]
 }
