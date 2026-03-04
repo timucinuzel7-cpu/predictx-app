@@ -1,7 +1,7 @@
 'use cache'
 
 import type { MDXComponents } from 'mdx/types'
-import type { Metadata, Route } from 'next'
+import type { Metadata } from 'next'
 import type { SupportedLocale } from '@/i18n/locales'
 import { DocsBody, DocsDescription, DocsPage, DocsTitle } from 'fumadocs-ui/layouts/docs/page'
 import defaultMdxComponents from 'fumadocs-ui/mdx'
@@ -40,13 +40,9 @@ export default async function Page(props: PageProps<'/[locale]/docs/[[...slug]]'
   setRequestLocale(params.locale)
   const isApiReferencePage = params.slug?.[0] === 'api-reference'
 
-  const isOwnerGuideEnabled = JSON.parse(process.env.FORK_OWNER_GUIDE || 'false')
+  const isOwnerGuideEnabled = process.env.FORK_OWNER_GUIDE === 'true'
   if (params.slug?.[0] === 'owners' && !isOwnerGuideEnabled) {
     redirect('/docs/users')
-  }
-  if (isApiReferencePage && params.slug?.length === 1) {
-    const introductionRoute = `/${params.locale}/docs/api-reference/introduction` as Route
-    redirect(introductionRoute)
   }
 
   const page = source.getPage(params.slug)
@@ -94,15 +90,6 @@ export async function generateMetadata(props: PageProps<'/[locale]/docs/[[...slu
   const isOwnerGuideEnabled = JSON.parse(process.env.FORK_OWNER_GUIDE || 'false')
   if (params.slug?.[0] === 'owners' && !isOwnerGuideEnabled) {
     notFound()
-  }
-  if (params.slug?.[0] === 'api-reference' && params.slug.length === 1) {
-    const introductionPage = source.getPage(['api-reference', 'introduction'])
-    return {
-      title: {
-        absolute: `${introductionPage?.data.title ?? 'API Reference'} | ${siteDocumentationTitle}`,
-      },
-      description: introductionPage?.data.description ?? 'API reference',
-    }
   }
 
   const page = source.getPage(params.slug)

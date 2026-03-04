@@ -4,7 +4,7 @@
   "icon": "SquareTerminal",
   "root": true,
   "pages": [
-    "introduction",
+    "index",
     "rate-limits",
     "authentication",
     "clients-sdks",
