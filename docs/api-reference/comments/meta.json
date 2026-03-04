@@ -6,7 +6,6 @@
     "delete-comment",
     "get-comment-metrics",
     "get-comments-by-comment-id",
-    "get-comments-by-user-address",
     "list-comments",
     "post-comment-reaction",
     "post-comments"
