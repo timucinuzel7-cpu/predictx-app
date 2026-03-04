@@ -5,12 +5,21 @@
   "root": true,
   "pages": [
     "index",
-    "---[CheckSquare]Launch Workflow---",
-    "launch-checklist",
     "---[Settings]Configuration---",
     "environment-variables",
     "cloudflare-reverse-proxy",
-    "---[Sparkles]Integrations---",
-    "market-context-generator"
+    "---[Server]Infra---",
+    "infra-overview",
+    "infra-deployment-targets",
+    "infra-scheduler-contract",
+    "---[PanelRight]Admin---",
+    "admin-general",
+    "admin-theme",
+    "admin-locales",
+    "admin-categories",
+    "admin-market-context",
+    "admin-affiliate",
+    "admin-events",
+    "admin-users"
   ]
 }

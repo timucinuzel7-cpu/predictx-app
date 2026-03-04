@@ -9,6 +9,7 @@ import { Accordions, Accordion } from 'fumadocs-ui/components/accordion'
 
 | Variable | Why it matters | How to obtain it |
 | --- | --- | --- |
+| `KUEST_ADDRESS`<br/>`KUEST_API_KEY`<br/>`KUEST_API_SECRET`<br/>`KUEST_PASSPHRASE` | Powers proxy-wallet setup and authenticated trading requests. Without these, users cannot complete trading auth. | Generate credentials at [auth.kuest.com](https://auth.kuest.com/) by connecting your Polygon wallet. |
 | `ADMIN_WALLETS` | Grants access to the admin dashboard. | Comma-separated list of wallet addresses for trusted operators. |
 | `REOWN_APPKIT_PROJECT_ID` | Enables wallet logins through Reown (WalletConnect). | Copy from the [Reown dashboard](https://dashboard.reown.com/). |
 | `BETTER_AUTH_SECRET` | Master secret for Better Auth sessions and encrypted trading credentials. | Generate a 32-character value in the [Better Auth docs](https://www.better-auth.com/docs/installation#set-environment-variables). |
@@ -18,20 +19,23 @@ import { Accordions, Accordion } from 'fumadocs-ui/components/accordion'
   Market syncs now use the Kuest-managed Goldsky subgraph at `https://api.goldsky.com/api/public/project_cmfbr456t4gud01w483uu2d9d/subgraphs/pnl-subgraph/1.0.0/gn`. Override it only if you're running custom infrastructure.
 </Callout>
 
+<Callout type="warning">
+  If `KUEST_*` credentials are missing or invalid, users can browse markets but will fail when creating trading auth/proxy wallet credentials.
+</Callout>
+
 ---
 
 ## Recommended adjustments
 
-- Branding, support links, analytics ID, fee recipient wallet, allowed market creators, and LI.FI credentials are managed in **Admin > General Settings**.
+- Branding, support links, analytics ID, fee recipient wallet, allowed market creators, LI.FI, and OpenRouter model/key are managed in **Admin > General Settings**.
+- Market Context prompt/toggle is managed in **Admin > Market Context**.
+- Endpoint overrides (`CLOB_URL`, `RELAYER_URL`, `DATA_URL`, `USER_PNL_URL`, `COMMUNITY_URL`, `WS_CLOB_URL`, `WS_LIVE_DATA_URL`) are only needed when you proxy infrastructure (see Cloudflare guide).
 
 ---
 
 ## Optional resources
 
 <Accordions>
-  <Accordion title="Enable this guide inside your fork" icon="BookOpen">
-    Set `FORK_OWNER_GUIDE=true` to expose the **Fork Owner Guide** section in your hosted docs - helpful for operators without repo access.
-  </Accordion>
   <Accordion title="Restrict markets to specific creators" icon="Users">
     Configure **Allowed market creator wallets** in **Admin > General Settings**. Add one wallet per line (or comma-separated) to restrict your market catalog.
   </Accordion>

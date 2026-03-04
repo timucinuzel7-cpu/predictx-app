@@ -1,24 +1,18 @@
 ---
 title: Cloudflare Reverse Proxy
-description: Proxy Kuest endpoints behind your own domain.
----
-
-# Cloudflare Reverse Proxy (Kuest endpoints)
-
-## Goal
-Use your own domain to call Kuest endpoints without exposing `kuest.com` in your frontend.
-
+description: Use your own domain to call Kuest endpoints without exposing `kuest.com` in your frontend.
 ---
 
 ## Step 1: DNS
 1) **Cloudflare Dashboard → Select your Domain → DNS → Records**. Create DNS records (CNAME) and keep **Proxy ON - orange cloud** (replace `yourdomain.com`):
 
-- `api.yourdomain.com` → `api.kuest.com`
 - `relayer.yourdomain.com` → `relayer.kuest.com`
 - `clob.yourdomain.com` → `clob.kuest.com`
 - `data-api.yourdomain.com` → `data-api.kuest.com`
 - `user-pnl-api.yourdomain.com` → `user-pnl-api.kuest.com`
 - `community.yourdomain.com` → `community.kuest.com`
+- `create-market.yourdomain.com` → `create-market.kuest.com`
+- `price-reference.yourdomain.com` → `price-reference.kuest.com`
 - `ws-live-data.yourdomain.com` → `ws-live-data.kuest.com`
 - `ws-subscriptions-clob.yourdomain.com` → `ws-subscriptions-clob.kuest.com`
 
@@ -30,12 +24,13 @@ Use your own domain to call Kuest endpoints without exposing `kuest.com` in your
 
 ```js
 const ORIGINS = {
-  'api.yourdomain.com': 'https://api.kuest.com',
   'relayer.yourdomain.com': 'https://relayer.kuest.com',
   'clob.yourdomain.com': 'https://clob.kuest.com',
   'data-api.yourdomain.com': 'https://data-api.kuest.com',
   'user-pnl-api.yourdomain.com': 'https://user-pnl-api.kuest.com',
   'community.yourdomain.com': 'https://community.kuest.com',
+  'create-market.yourdomain.com': 'https://create-market.kuest.com',
+  'price-reference.yourdomain.com': 'https://price-reference.kuest.com',
   'ws-live-data.yourdomain.com': 'https://ws-live-data.kuest.com',
   'ws-subscriptions-clob.yourdomain.com': 'https://ws-subscriptions-clob.kuest.com',
 }
@@ -69,12 +64,13 @@ export default {
 
 3) **Worker → Settings → Triggers → Routes** (or **Domains & Routes**, depending on UI). Add these routes:
 
-- `api.yourdomain.com/*`
 - `relayer.yourdomain.com/*`
 - `clob.yourdomain.com/*`
 - `data-api.yourdomain.com/*`
 - `user-pnl-api.yourdomain.com/*`
 - `community.yourdomain.com/*`
+- `create-market.yourdomain.com/*`
+- `price-reference.yourdomain.com/*`
 - `ws-live-data.yourdomain.com/*`
 - `ws-subscriptions-clob.yourdomain.com/*`
 
@@ -89,17 +85,20 @@ export default {
 Use your subdomains:
 
 ```
+CREATE_MARKET_URL=https://create-market.yourdomain.com
 DATA_URL=https://data-api.yourdomain.com
 CLOB_URL=https://clob.yourdomain.com
 RELAYER_URL=https://relayer.yourdomain.com
 USER_PNL_URL=https://user-pnl-api.yourdomain.com
 COMMUNITY_URL=https://community.yourdomain.com
+PRICE_REFERENCE_URL=https://price-reference.yourdomain.com
 WS_LIVE_DATA_URL=wss://ws-live-data.yourdomain.com
 WS_CLOB_URL=wss://ws-subscriptions-clob.yourdomain.com
 ```
 
-> Note: keep these exact names (no `NEXT_PUBLIC_` prefix).
-> This project already exposes them to the client via `next.config.ts`.
+<Callout type="info">
+  Keep these exact names (no `NEXT_PUBLIC_` prefix). This project already exposes them to the client via `next.config.ts`.
+</Callout>
 
 ---
 

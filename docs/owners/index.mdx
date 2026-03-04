@@ -1,14 +1,9 @@
 ---
-title: Launch Overview
+title: Overview
 description: What fork owners need to ship a live instance.
 ---
 
-import { SiteName } from '@/components/docs/SiteName'
 import { Steps, Step } from 'fumadocs-ui/components/steps'
-
-<Callout>
-  This track is for teams launching a fork of <SiteName />. We keep it focused on the decisions that usually block a successful deploy.
-</Callout>
 
 ## High-level flow
 
@@ -19,29 +14,39 @@ import { Steps, Step } from 'fumadocs-ui/components/steps'
     Create the fork on GitHub and keep the project name short so it is easy to locate from Vercel.
   </Step>
   <Step>
-    ### Import into Vercel
+    ### Prepare environment variables
 
-    From the Vercel dashboard choose **Add New -> Project**, connect GitHub, and select your fork. The first build can fail until secrets are available.
+    Download `.env.example`, fill in required values, and keep this file ready for import during Vercel project setup.
+  </Step>
+  <Step>
+    ### Import into Vercel and run first deploy
+
+    From **Vercel -> Add New -> Project**, connect GitHub, import your fork, then use **Import .env** before deploying.
   </Step>
   <Step>
     ### Provision Supabase
 
-    Use the integration under **Storage -> Supabase** to create and link a database to the project.
+    Use **Storage -> Supabase** to create and connect a database to the project.
   </Step>
   <Step>
-    ### Load environment variables
+    ### Redeploy after database connection
 
-    Update `.env.example` locally and import it under **Settings -> Environment Variables** so the deploy has everything it needs.
+    Redeploy the latest build so the app starts with the database integration active.
   </Step>
   <Step>
-    ### Deploy and enable sync
+    ### Enable GitHub Actions sync
 
-    Trigger the deploy once secrets are in place and enable GitHub Actions so the fork stays aligned with upstream updates.
+    In your fork, allow GitHub Actions so upstream sync workflows can run.
+  </Step>
+  <Step>
+    ### Finish setup in Admin
+
+    Log in with an admin wallet and complete the first pass in [**Admin -> General**](/docs/owners/admin-general).
   </Step>
   <Step>
     ### Add optional integrations
 
-    Configure the Market Context generator via OpenRouter only if you need AI-based summaries.
+    Configure OpenRouter and Market Context only if your fork needs AI-generated context/translations.
   </Step>
 </Steps>
 
@@ -49,10 +54,7 @@ import { Steps, Step } from 'fumadocs-ui/components/steps'
 
 ## What you'll find here
 
-- **Launch checklist:** a streamlined sequence covering the minimum required actions.
 - **Environment reference:** only the env vars that affect production launches.
-- **Market Context generator:** how to unlock the OpenRouter flow and the caveats for the free tier.
-
-<Callout type="info">
-  Share this guide with fork operators by setting `FORK_OWNER_GUIDE=true`.
-</Callout>
+- **Network proxy setup:** how to route Kuest infrastructure through your own domain.
+- **Infra section (non-Vercel):** deployment targets, storage-mode decisioning, and scheduler contract.
+- **Admin guides:** one page for each admin section: General, Theme, Locales, Categories, Market Context, Affiliate, Events, and Users.

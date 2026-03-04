@@ -5,9 +5,9 @@
   "root": true,
   "pages": [
     "index",
-    "---[CirclePlay]Getting Started---",
+    "---[BookOpen]Getting Started---",
     "...getting-started",
-    "---[Compass]Trading Basics---",
+    "---[ChartCandlestick]Trading Basics---",
     "...exploring-markets",
     "---[UserCircle]Portfolio & Settings---",
     "...my-account",
