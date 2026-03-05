@@ -4,7 +4,7 @@ import type { Table } from '@tanstack/react-table'
 import type { ReactNode } from 'react'
 import { XIcon } from 'lucide-react'
 import { useExtracted } from 'next-intl'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useDebounce } from '@/hooks/useDebounce'
@@ -39,12 +39,19 @@ export function DataTableToolbar<TData>({
   const t = useExtracted()
   const [searchInput, setSearchInput] = useState(search)
   const debouncedSearchInput = useDebounce(searchInput, 300)
+  const skipNextDebouncedSyncRef = useRef(false)
 
   useEffect(() => {
+    skipNextDebouncedSyncRef.current = true
     setSearchInput(search)
   }, [search])
 
   useEffect(() => {
+    if (skipNextDebouncedSyncRef.current) {
+      skipNextDebouncedSyncRef.current = false
+      return
+    }
+
     if (debouncedSearchInput !== searchInput || debouncedSearchInput === search) {
       return
     }
