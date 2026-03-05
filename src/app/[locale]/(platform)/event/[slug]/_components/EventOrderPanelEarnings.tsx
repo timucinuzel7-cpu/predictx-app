@@ -35,13 +35,13 @@ export default function EventOrderPanelEarnings({
   buyMultiplier,
 }: EventOrderPanelEarningsProps) {
   const t = useExtracted()
-  const buyPayoutLabel = formatCurrency(Math.max(0, buyPayout))
+  const buyToWinLabel = formatCurrency(Math.max(0, buyPayout))
   const buyProfitLabel = formatCurrency(buyProfit)
   const buyChangeLabel = `${buyChangePct >= 0 ? '+' : '-'}${Math.abs(buyChangePct).toFixed(0)}%`
   const buyMultiplierLabel = `${Math.max(0, buyMultiplier).toFixed(2)}x`
 
-  const mobileEarningsLabel = side === ORDER_SIDE.SELL ? sellAmountLabel : buyPayoutLabel
-  const desktopEarningsLabel = side === ORDER_SIDE.SELL ? sellAmountLabel : buyPayoutLabel
+  const mobileEarningsLabel = side === ORDER_SIDE.SELL ? sellAmountLabel : buyToWinLabel
+  const desktopEarningsLabel = side === ORDER_SIDE.SELL ? sellAmountLabel : buyToWinLabel
   const shouldShowMoneyIcon = true
   const effectivePriceCents = side === ORDER_SIDE.SELL ? avgSellPriceCents : avgBuyPriceCents
   const effectivePriceDollars = typeof effectivePriceCents === 'number' && Number.isFinite(effectivePriceCents)

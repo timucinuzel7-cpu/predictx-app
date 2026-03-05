@@ -134,9 +134,7 @@ export default function EventOrderPanelLimitControls({
       return Number.isFinite(total) ? total : 0
     }
 
-    const payoutPerShare = (100 - limitPriceNumber) / 100
-    const total = limitSharesNumber * payoutPerShare
-    return Number.isFinite(total) ? total : 0
+    return Number.isFinite(limitSharesNumber) ? limitSharesNumber : 0
   }, [limitPriceNumber, limitSharesNumber, side])
 
   const maxSharesForSide = MAX_AMOUNT_INPUT
