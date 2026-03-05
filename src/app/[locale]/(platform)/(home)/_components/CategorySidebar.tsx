@@ -4,14 +4,14 @@ import type { Route } from 'next'
 import type { ReactNode } from 'react'
 import type { CategoryPathSidebarSlug } from '@/lib/constants'
 import { useExtracted } from 'next-intl'
-import { useMemo } from 'react'
-import { useFilters } from '@/app/[locale]/(platform)/_providers/FilterProvider'
-import { Link, usePathname } from '@/i18n/navigation'
+import { Link } from '@/i18n/navigation'
 import { cn } from '@/lib/utils'
 
 interface CategorySidebarProps {
+  activeSubcategorySlug: string | null
   categorySlug: CategoryPathSidebarSlug
   categoryTitle: string
+  onNavigate: (targetTag: string) => void
   subcategories: { name: string, slug: string }[]
 }
 
@@ -41,39 +41,13 @@ function CategorySidebarLink({ children, href, isActive, onClick }: CategorySide
 }
 
 export default function CategorySidebar({
+  activeSubcategorySlug,
   categorySlug,
   categoryTitle,
+  onNavigate,
   subcategories,
 }: CategorySidebarProps) {
   const t = useExtracted()
-  const pathname = usePathname()
-  const { filters, updateFilters } = useFilters()
-
-  const pathSubcategorySlug = useMemo(() => {
-    const pathSegments = pathname.split('/').filter(Boolean)
-    if (pathSegments[0] !== categorySlug) {
-      return null
-    }
-
-    return pathSegments.length === 2 ? pathSegments[1] : null
-  }, [categorySlug, pathname])
-
-  const activeSubcategorySlug = useMemo(() => {
-    if (pathSubcategorySlug) {
-      return pathSubcategorySlug
-    }
-
-    const belongsToCategory = filters.mainTag === categorySlug || filters.tag === categorySlug
-    if (!belongsToCategory || filters.tag === categorySlug) {
-      return null
-    }
-
-    return filters.tag
-  }, [categorySlug, filters.mainTag, filters.tag, pathSubcategorySlug])
-
-  function handleNavigate(targetTag: string) {
-    updateFilters({ tag: targetTag, mainTag: categorySlug })
-  }
 
   return (
     <nav
@@ -87,7 +61,7 @@ export default function CategorySidebar({
       <CategorySidebarLink
         href={`/${categorySlug}` as Route}
         isActive={activeSubcategorySlug === null}
-        onClick={() => handleNavigate(categorySlug)}
+        onClick={() => onNavigate(categorySlug)}
       >
         {t('All')}
       </CategorySidebarLink>
@@ -97,7 +71,7 @@ export default function CategorySidebar({
           key={subcategory.slug}
           href={`/${categorySlug}/${subcategory.slug}` as Route}
           isActive={activeSubcategorySlug === subcategory.slug}
-          onClick={() => handleNavigate(subcategory.slug)}
+          onClick={() => onNavigate(subcategory.slug)}
         >
           {subcategory.name}
         </CategorySidebarLink>
