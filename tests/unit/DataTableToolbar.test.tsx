@@ -61,6 +61,11 @@ describe('dataTableToolbar', () => {
     })
 
     expect(onSearchChange).not.toHaveBeenCalled()
+
+    act(() => {
+      vi.advanceTimersByTime(300)
+    })
+    expect(onSearchChange).not.toHaveBeenCalled()
   })
 
   it('still emits debounced user input after an external search sync', () => {
