@@ -969,7 +969,9 @@ export const EventRepository = {
           SELECT 1
           FROM ${event_tags} et
           JOIN ${tags} t ON t.id = et.tag_id
-          WHERE et.event_id = ${events.id} AND t.hide_events = TRUE
+          WHERE et.event_id = ${events.id}
+            AND t.hide_events = TRUE
+            AND t.slug <> ${HIDE_FROM_NEW_TAG_SLUG}
         )`,
       )
 

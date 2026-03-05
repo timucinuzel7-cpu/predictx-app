@@ -19,12 +19,12 @@ export async function ensureHideFromNewTagId(): Promise<number> {
       slug: HIDE_FROM_NEW_TAG_SLUG,
       is_main_category: false,
       is_hidden: true,
-      hide_events: true,
+      hide_events: false,
     })
     .onConflictDoUpdate({
       target: [tags.slug],
       set: {
-        hide_events: true,
+        hide_events: false,
         is_hidden: true,
       },
     })
