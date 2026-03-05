@@ -1,8 +1,8 @@
 import type { Route } from 'next'
 import type { PublicActivityRowProps } from '@/app/[locale]/(platform)/[username]/_types/PublicActivityTypes'
 import { CircleDollarSignIcon } from 'lucide-react'
-import Image from 'next/image'
 import { activityIcon, formatPriceCents, formatShares, resolveVariant } from '@/app/[locale]/(platform)/[username]/_utils/PublicActivityUtils'
+import EventIconImage from '@/components/EventIconImage'
 import { Link } from '@/i18n/navigation'
 import { MICRO_UNIT } from '@/lib/constants'
 import { formatCurrency, formatTimeAgo } from '@/lib/formatters'
@@ -59,12 +59,11 @@ export default function PublicActivityRow({ activity }: PublicActivityRowProps) 
           >
             {imageUrl
               ? (
-                  <Image
+                  <EventIconImage
                     src={imageUrl}
                     alt={activity.market.title}
-                    fill
                     sizes="48px"
-                    className="object-cover"
+                    containerClassName="size-full"
                   />
                 )
               : (

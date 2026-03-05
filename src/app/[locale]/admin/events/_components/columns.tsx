@@ -4,7 +4,7 @@ import type { ColumnDef } from '@tanstack/react-table'
 import type { AdminEventRow } from '@/app/[locale]/admin/events/_hooks/useAdminEvents'
 import { ArrowUpDownIcon, EyeIcon, EyeOffIcon, RadioIcon, RepeatIcon, TrophyIcon } from 'lucide-react'
 import { useExtracted } from 'next-intl'
-import Image from 'next/image'
+import EventIconImage from '@/components/EventIconImage'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
@@ -75,12 +75,11 @@ export function useAdminEventsColumns({
               <div className="relative size-10 shrink-0 overflow-hidden rounded-md border bg-muted/40">
                 {event.icon_url
                   ? (
-                      <Image
+                      <EventIconImage
                         src={event.icon_url}
                         alt={event.title}
-                        fill
                         sizes="40px"
-                        className="object-cover"
+                        containerClassName="size-full"
                       />
                     )
                   : (

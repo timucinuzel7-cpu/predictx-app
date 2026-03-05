@@ -1,8 +1,8 @@
 import type { Route } from 'next'
 import type { PublicPosition } from './PublicPositionItem'
 import { ArrowRightIcon, ShareIcon } from 'lucide-react'
-import Image from 'next/image'
 import { formatCurrencyValue, getLatestPrice, getValue } from '@/app/[locale]/(platform)/[username]/_utils/PublicPositionsUtils'
+import EventIconImage from '@/components/EventIconImage'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { Link } from '@/i18n/navigation'
@@ -45,12 +45,11 @@ export default function PublicPositionsRow({
           >
             {imageSrc
               ? (
-                  <Image
+                  <EventIconImage
                     src={imageSrc}
                     alt={position.title}
-                    fill
                     sizes="48px"
-                    className="object-cover"
+                    containerClassName="size-full"
                   />
                 )
               : (

@@ -4,11 +4,11 @@ import type { Event, UserPosition } from '@/types'
 import { useQuery } from '@tanstack/react-query'
 import { ShareIcon } from 'lucide-react'
 import { useExtracted } from 'next-intl'
-import Image from 'next/image'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { PositionShareDialog } from '@/app/[locale]/(platform)/_components/PositionShareDialog'
 import EventConvertPositionsDialog from '@/app/[locale]/(platform)/event/[slug]/_components/EventConvertPositionsDialog'
 import AlertBanner from '@/components/AlertBanner'
+import EventIconImage from '@/components/EventIconImage'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
 import { Drawer, DrawerContent } from '@/components/ui/drawer'
@@ -453,12 +453,11 @@ function NetPositionsDialog({
                 <div className="flex min-w-0 items-center gap-3">
                   {row.iconUrl
                     ? (
-                        <Image
+                        <EventIconImage
                           src={row.iconUrl}
                           alt={row.outcomeLabel}
-                          width={36}
-                          height={36}
-                          className="size-9 rounded-md object-cover"
+                          sizes="36px"
+                          containerClassName="size-9 rounded-md"
                         />
                       )
                     : (

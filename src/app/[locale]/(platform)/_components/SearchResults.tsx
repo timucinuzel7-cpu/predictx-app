@@ -1,7 +1,7 @@
 import type { Event, PublicProfile, SearchLoadingStates, SearchResultItems } from '@/types'
 import { LoaderIcon } from 'lucide-react'
 import { useExtracted } from 'next-intl'
-import Image from 'next/image'
+import EventIconImage from '@/components/EventIconImage'
 import ProfileLink from '@/components/ProfileLink'
 import { Link } from '@/i18n/navigation'
 import { SearchTabs } from './SearchTabs'
@@ -137,12 +137,11 @@ function EventResults({ events, query, isLoading, onResultClick }: EventResultsP
         >
           <div className="flex min-w-0 flex-1 items-center gap-3">
             <div className="size-8 shrink-0 overflow-hidden rounded-sm">
-              <Image
+              <EventIconImage
                 src={result.icon_url}
                 alt={result.title}
-                width={32}
-                height={32}
-                className="size-full object-cover"
+                sizes="32px"
+                containerClassName="size-full"
               />
             </div>
 

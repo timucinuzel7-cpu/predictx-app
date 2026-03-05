@@ -1,7 +1,7 @@
 import type { Event, Market } from '@/types'
 import type { SelectedOutcome } from '@/types/EventCardTypes'
 import { useExtracted } from 'next-intl'
-import Image from 'next/image'
+import EventIconImage from '@/components/EventIconImage'
 import { useOutcomeLabel } from '@/hooks/useOutcomeLabel'
 import { Link } from '@/i18n/navigation'
 import { OUTCOME_INDEX } from '@/lib/constants'
@@ -62,16 +62,15 @@ export default function EventCardHeader({
       <Link href={eventHref} className="flex flex-1 items-center gap-2 pr-2">
         <div
           className={`
-            relative flex ${iconSizeClass}
-            shrink-0 items-center justify-center self-start overflow-hidden rounded-sm
+            flex ${iconSizeClass}
+            shrink-0 items-center justify-center self-start rounded-sm
           `}
         >
-          <Image
+          <EventIconImage
             src={headerIcon}
             alt={headerTitle || event.creator || 'Market'}
-            fill
             sizes={isInTradingMode ? '28px' : '40px'}
-            className="scale-[1.35] object-cover object-center"
+            containerClassName="size-full rounded-sm"
           />
         </div>
 

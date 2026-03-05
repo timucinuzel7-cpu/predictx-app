@@ -4,9 +4,9 @@ import type { EventMarketRow } from '@/app/[locale]/(platform)/event/[slug]/_hoo
 import { useQuery } from '@tanstack/react-query'
 import { XIcon } from 'lucide-react'
 import { useExtracted } from 'next-intl'
-import Image from 'next/image'
 import { memo, useMemo } from 'react'
 import EventMarketChance from '@/app/[locale]/(platform)/event/[slug]/_components/EventMarketChance'
+import EventIconImage from '@/components/EventIconImage'
 import { Button } from '@/components/ui/button'
 import { useOutcomeLabel } from '@/hooks/useOutcomeLabel'
 import { OUTCOME_INDEX } from '@/lib/constants'
@@ -140,12 +140,11 @@ function EventMarketCardComponent({
             <div className="flex items-center justify-between">
               <div className="flex items-start gap-3">
                 {shouldShowIcon && (
-                  <Image
+                  <EventIconImage
                     src={market.icon_url}
                     alt={market.title}
-                    width={42}
-                    height={42}
-                    className="shrink-0 rounded-md"
+                    sizes="42px"
+                    containerClassName="size-[42px] shrink-0 rounded-md"
                   />
                 )}
                 <div>
@@ -227,12 +226,11 @@ function EventMarketCardComponent({
             <div className="flex w-2/5 flex-col gap-2">
               <div className="flex items-start gap-3">
                 {shouldShowIcon && (
-                  <Image
+                  <EventIconImage
                     src={market.icon_url}
                     alt={market.title}
-                    width={42}
-                    height={42}
-                    className="shrink-0 rounded-md"
+                    sizes="42px"
+                    containerClassName="size-[42px] shrink-0 rounded-md"
                   />
                 )}
                 <div>

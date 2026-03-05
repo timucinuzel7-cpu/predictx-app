@@ -1,7 +1,7 @@
 'use client'
 
 import { CheckIcon } from 'lucide-react'
-import Image from 'next/image'
+import EventIconImage from '@/components/EventIconImage'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -94,11 +94,11 @@ export function MergePositionsDialog({
               <div className="relative size-10 overflow-hidden rounded-md bg-muted sm:size-12">
                 {market.icon
                   ? (
-                      <Image
+                      <EventIconImage
                         src={`https://gateway.irys.xyz/${market.icon}`}
                         alt={`${market.title} icon`}
-                        fill
-                        className="object-cover"
+                        sizes="(min-width: 640px) 48px, 40px"
+                        containerClassName="size-full"
                       />
                     )
                   : (

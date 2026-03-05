@@ -4,6 +4,7 @@ import type { Notification } from '@/types'
 import { BellIcon, ExternalLinkIcon } from 'lucide-react'
 import Image from 'next/image'
 import { useEffect } from 'react'
+import EventIconImage, { isEventMarketIconUrl } from '@/components/EventIconImage'
 import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { getAvatarPlaceholderStyle } from '@/lib/avatar'
@@ -178,13 +179,24 @@ export default function HeaderNotifications() {
                       {(() => {
                         const avatarUrl = notification.user_avatar?.trim() ?? ''
                         if (avatarUrl) {
+                          if (isEventMarketIconUrl(avatarUrl)) {
+                            return (
+                              <EventIconImage
+                                src={avatarUrl}
+                                alt="User avatar"
+                                sizes="42px"
+                                containerClassName="size-10.5 rounded-md"
+                              />
+                            )
+                          }
+
                           return (
                             <Image
                               src={avatarUrl}
                               alt="User avatar"
                               width={42}
                               height={42}
-                              className="rounded-md object-cover"
+                              className="size-10.5 rounded-md object-cover"
                             />
                           )
                         }

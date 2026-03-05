@@ -13,6 +13,7 @@ import { hashTypedData } from 'viem'
 import { useSignMessage } from 'wagmi'
 import { getSafeNonceAction, submitSafeTransactionAction } from '@/app/[locale]/(platform)/_actions/approve-tokens'
 import { useTradingOnboarding } from '@/app/[locale]/(platform)/_providers/TradingOnboardingProvider'
+import EventIconImage from '@/components/EventIconImage'
 import SiteLogoIcon from '@/components/SiteLogoIcon'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -301,12 +302,11 @@ export default function PortfolioMarketsWonCardClient({ data }: PortfolioMarkets
                   >
                     {market?.imageUrl
                       ? (
-                          <Image
+                          <EventIconImage
                             src={market.imageUrl}
                             alt={market.title}
-                            fill
                             sizes="44px"
-                            className="object-cover"
+                            containerClassName="size-full"
                           />
                         )
                       : (
@@ -392,12 +392,11 @@ export default function PortfolioMarketsWonCardClient({ data }: PortfolioMarkets
                 <div className="relative size-12 overflow-hidden rounded-md">
                   {market.imageUrl
                     ? (
-                        <Image
+                        <EventIconImage
                           src={market.imageUrl}
                           alt={market.title}
-                          fill
                           sizes="48px"
-                          className="object-cover"
+                          containerClassName="size-full"
                         />
                       )
                     : (

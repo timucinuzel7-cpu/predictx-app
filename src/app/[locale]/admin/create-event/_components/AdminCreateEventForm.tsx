@@ -20,11 +20,11 @@ import {
   Trash2Icon,
   XIcon,
 } from 'lucide-react'
-import Image from 'next/image'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { createPublicClient, formatUnits, getAddress, http, isAddress, keccak256, parseGwei, stringToHex, toHex } from 'viem'
 import { usePublicClient, useWalletClient } from 'wagmi'
+import EventIconImage from '@/components/EventIconImage'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
@@ -3561,12 +3561,12 @@ export default function AdminCreateEventForm() {
                     />
                     {eventImagePreviewUrl
                       ? (
-                          <Image
+                          <EventIconImage
                             src={eventImagePreviewUrl}
                             alt="Event image preview"
-                            fill
+                            sizes="256px"
                             unoptimized
-                            className="object-cover"
+                            containerClassName="size-full"
                           />
                         )
                       : (
@@ -4006,12 +4006,12 @@ export default function AdminCreateEventForm() {
                           />
                           {optionImagePreviewUrls[option.id]
                             ? (
-                                <Image
+                                <EventIconImage
                                   src={optionImagePreviewUrls[option.id]}
                                   alt={`Option ${index + 1} image preview`}
-                                  fill
+                                  sizes="256px"
                                   unoptimized
-                                  className="object-cover"
+                                  containerClassName="size-full"
                                 />
                               )
                             : (
@@ -4162,11 +4162,11 @@ export default function AdminCreateEventForm() {
                   <div className="relative size-22 overflow-hidden rounded-md border bg-muted">
                     {eventImagePreviewUrl
                       ? (
-                          <Image
+                          <EventIconImage
                             src={eventImagePreviewUrl}
                             alt="Event preview"
-                            fill
-                            className="object-cover"
+                            sizes="88px"
+                            containerClassName="size-full"
                           />
                         )
                       : (
@@ -4188,11 +4188,11 @@ export default function AdminCreateEventForm() {
                           <div className="flex items-center gap-3">
                             {market.imageUrl && (
                               <div className="relative size-12 shrink-0 overflow-hidden rounded-md border bg-muted">
-                                <Image
+                                <EventIconImage
                                   src={market.imageUrl}
                                   alt={`Market ${index + 1} preview`}
-                                  fill
-                                  className="object-cover"
+                                  sizes="48px"
+                                  containerClassName="size-full"
                                 />
                               </div>
                             )}

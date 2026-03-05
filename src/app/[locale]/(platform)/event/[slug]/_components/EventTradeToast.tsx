@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import Image from 'next/image'
+import EventIconImage from '@/components/EventIconImage'
 
 interface EventTradeToastProps {
   title: string
@@ -12,12 +12,11 @@ export default function EventTradeToast({ title, marketImage, marketTitle, child
   return (
     <div className="flex items-center gap-3">
       {marketImage && (
-        <Image
+        <EventIconImage
           src={marketImage}
           alt={marketTitle || title}
-          width={40}
-          height={40}
-          className="size-10 rounded-sm object-cover"
+          sizes="40px"
+          containerClassName="size-10 rounded-sm"
         />
       )}
       <div>

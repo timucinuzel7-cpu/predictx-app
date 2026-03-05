@@ -1,8 +1,8 @@
 'use client'
 
 import type { NormalizedBookLevel } from '@/lib/order-panel-utils'
-import Image from 'next/image'
 import { useEffect, useMemo, useState } from 'react'
+import EventIconImage from '@/components/EventIconImage'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
 import { Drawer, DrawerContent } from '@/components/ui/drawer'
@@ -125,12 +125,11 @@ export default function SellPositionModal({
       <div className="flex items-center gap-3">
         {iconUrl
           ? (
-              <Image
+              <EventIconImage
                 src={iconUrl}
                 alt={outcomeLabel}
-                width={64}
-                height={64}
-                className="size-16 rounded-md object-cover"
+                sizes="64px"
+                containerClassName="size-16 rounded-md"
               />
             )
           : (

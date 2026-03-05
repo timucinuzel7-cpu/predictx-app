@@ -1,7 +1,7 @@
 'use client'
 
 import type { Event } from '@/types'
-import Image from 'next/image'
+import EventIconImage from '@/components/EventIconImage'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { NewBadge } from '@/components/ui/new-badge'
@@ -115,13 +115,12 @@ function MentionsListItem({ event }: MentionsListItemProps) {
             'duration-300 group-hover:scale-105 md:size-20',
           )}
         >
-          <Image
+          <EventIconImage
             src={event.icon_url}
             alt={event.title}
-            fill
             sizes="(max-width: 768px) 4rem, 5rem"
-            className="object-cover"
             priority={false}
+            containerClassName="size-full"
           />
         </div>
       </div>

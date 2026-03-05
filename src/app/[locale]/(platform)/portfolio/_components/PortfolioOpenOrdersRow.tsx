@@ -2,7 +2,6 @@ import type { Route } from 'next'
 import type { PortfolioUserOpenOrder } from '@/app/[locale]/(platform)/portfolio/_types/PortfolioOpenOrdersTypes'
 import { XIcon } from 'lucide-react'
 import { useExtracted } from 'next-intl'
-import Image from 'next/image'
 import {
   formatCents,
   formatExpirationLabel,
@@ -10,6 +9,7 @@ import {
   getOrderTotalShares,
   microToUnit,
 } from '@/app/[locale]/(platform)/portfolio/_utils/PortfolioOpenOrdersUtils'
+import EventIconImage from '@/components/EventIconImage'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { useOutcomeLabel } from '@/hooks/useOutcomeLabel'
@@ -51,12 +51,11 @@ export default function PortfolioOpenOrdersRow({ order }: PortfolioOpenOrdersRow
           >
             {marketIcon
               ? (
-                  <Image
+                  <EventIconImage
                     src={marketIcon}
                     alt={order.market.title}
-                    fill
                     sizes="48px"
-                    className="object-cover"
+                    containerClassName="size-full"
                   />
                 )
               : (

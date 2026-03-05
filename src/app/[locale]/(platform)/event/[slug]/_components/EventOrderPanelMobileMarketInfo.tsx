@@ -1,6 +1,6 @@
 import type { Event, Market } from '@/types'
 import { useExtracted } from 'next-intl'
-import Image from 'next/image'
+import EventIconImage from '@/components/EventIconImage'
 import { Skeleton } from '@/components/ui/skeleton'
 import { usePortfolioValueVisibility } from '@/stores/usePortfolioValueVisibility'
 
@@ -28,12 +28,11 @@ export default function EventOrderPanelMobileMarketInfo({
 
   return (
     <div className="mb-4 flex items-center gap-3.5">
-      <Image
+      <EventIconImage
         src={market.icon_url}
         alt={market.title}
-        width={36}
-        height={36}
-        className="shrink-0 rounded-md"
+        sizes="36px"
+        containerClassName="size-9 shrink-0 rounded-md"
       />
       <div className="flex-1">
         <div className="line-clamp-2 text-base/tight font-semibold">

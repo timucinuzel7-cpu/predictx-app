@@ -9,7 +9,6 @@ import type { Event, UserPosition } from '@/types'
 import { useQuery } from '@tanstack/react-query'
 import { CheckIcon, ChevronDownIcon, LockKeyholeIcon, RefreshCwIcon, XIcon } from 'lucide-react'
 import { useExtracted, useLocale } from 'next-intl'
-import Image from 'next/image'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import SellPositionModal from '@/app/[locale]/(platform)/_components/SellPositionModal'
 import ConnectionStatusIndicator from '@/app/[locale]/(platform)/event/[slug]/_components/ConnectionStatusIndicator'
@@ -27,6 +26,7 @@ import { useMarketDetailController } from '@/app/[locale]/(platform)/event/[slug
 import { useUserOpenOrdersQuery } from '@/app/[locale]/(platform)/event/[slug]/_hooks/useUserOpenOrdersQuery'
 import { useUserShareBalances } from '@/app/[locale]/(platform)/event/[slug]/_hooks/useUserShareBalances'
 import { isResolutionReviewActive } from '@/app/[locale]/(platform)/event/[slug]/_utils/resolution-timeline-builder'
+import EventIconImage from '@/components/EventIconImage'
 import { Button } from '@/components/ui/button'
 import { useOutcomeLabel } from '@/hooks/useOutcomeLabel'
 import { useSiteIdentity } from '@/hooks/useSiteIdentity'
@@ -787,12 +787,11 @@ function ResolvedMarketRow({
       <div className="flex w-full flex-col gap-3 lg:flex-row lg:items-center">
         <div className="flex w-full items-start gap-3 lg:w-2/5">
           {shouldShowIcon && (
-            <Image
+            <EventIconImage
               src={market.icon_url}
               alt={market.title}
-              width={42}
-              height={42}
-              className="shrink-0 rounded-md"
+              sizes="42px"
+              containerClassName="size-[42px] shrink-0 rounded-md"
             />
           )}
           <div>

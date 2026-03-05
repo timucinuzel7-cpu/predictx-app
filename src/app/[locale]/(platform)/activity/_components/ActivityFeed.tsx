@@ -5,8 +5,8 @@ import type { DataApiActivity } from '@/lib/data-api/user'
 import type { ActivityOrder } from '@/types'
 import { Loader2Icon, SquareArrowOutUpRightIcon } from 'lucide-react'
 import { useExtracted } from 'next-intl'
-import Image from 'next/image'
 import { useEffect, useMemo, useRef, useState } from 'react'
+import EventIconImage from '@/components/EventIconImage'
 import ProfileLink from '@/components/ProfileLink'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -562,12 +562,11 @@ export default function ActivityFeed() {
                   >
                     {marketIcon
                       ? (
-                          <Image
+                          <EventIconImage
                             src={marketIcon}
                             alt={activity.market.title}
-                            fill
                             sizes="48px"
-                            className="object-cover"
+                            containerClassName="size-full"
                           />
                         )
                       : (

@@ -12,7 +12,6 @@ import type {
 } from '@/types/PredictionChartTypes'
 import { useQuery } from '@tanstack/react-query'
 import dynamic from 'next/dynamic'
-import Image from 'next/image'
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useMarketChannelSubscription } from '@/app/[locale]/(platform)/event/[slug]/_components/EventMarketChannelProvider'
 import {
@@ -42,6 +41,7 @@ import {
   getOutcomeLabelForMarket,
   getTopMarketIds,
 } from '@/app/[locale]/(platform)/event/[slug]/_utils/EventChartUtils'
+import EventIconImage from '@/components/EventIconImage'
 import SiteLogoIcon from '@/components/SiteLogoIcon'
 import { useOutcomeLabel } from '@/hooks/useOutcomeLabel'
 import { useSiteIdentity } from '@/hooks/useSiteIdentity'
@@ -935,12 +935,11 @@ function EventChartComponent({
           <div className="flex items-center gap-2 text-xs whitespace-nowrap">
             {outcomeIconUrl
               ? (
-                  <Image
+                  <EventIconImage
                     src={outcomeIconUrl}
                     alt={outcomeLabel}
-                    height={20}
-                    width={20}
-                    className="size-5 rounded-full object-cover"
+                    sizes="20px"
+                    containerClassName="size-5 rounded-full"
                   />
                 )
               : null}

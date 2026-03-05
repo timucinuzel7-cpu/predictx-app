@@ -3,9 +3,9 @@
 import type { Event } from '@/types'
 import { useQuery } from '@tanstack/react-query'
 import { useExtracted, useLocale } from 'next-intl'
-import Image from 'next/image'
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import EventRelatedSkeleton from '@/app/[locale]/(platform)/event/[slug]/_components/EventRelatedSkeleton'
+import EventIconImage from '@/components/EventIconImage'
 import { Button } from '@/components/ui/button'
 import { Link } from '@/i18n/navigation'
 import { cn } from '@/lib/utils'
@@ -347,13 +347,12 @@ export default function EventRelated({ event }: EventRelatedProps) {
                         href={`/event/${relatedEvent.slug}`}
                         className="flex items-center gap-3 rounded-lg p-2 transition-colors hover:bg-muted/80"
                       >
-                        <Image
+                        <EventIconImage
                           src={relatedEvent.icon_url}
                           alt={relatedEvent.title}
-                          width={42}
-                          height={42}
                           quality={100}
-                          className="shrink-0 rounded-sm object-cover"
+                          sizes="42px"
+                          containerClassName="size-[42px] shrink-0 rounded-sm"
                         />
                         <div className="flex min-w-0 flex-1 items-center justify-between gap-3">
                           <strong className="line-clamp-2 text-sm font-medium text-foreground">
