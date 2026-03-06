@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { Link } from '@/i18n/navigation'
 import { formatCompactCurrency, formatDate } from '@/lib/formatters'
+import { isSportsAuxiliaryEventSlug } from '@/lib/sports-event-slugs'
 
 interface EventColumnOptions {
   onToggleHidden: (event: AdminEventRow, nextValue: boolean) => void
@@ -223,10 +224,11 @@ export function useAdminEventsColumns({
         const event = row.original
         const hiddenUpdatePending = isUpdatingHidden(event.id)
         const nextHiddenState = !event.is_hidden
+        const shouldHideSportsAdminControls = isSportsAuxiliaryEventSlug(event.slug)
 
         return (
           <div className="flex w-full items-center justify-end gap-1">
-            {event.is_sports_games_moneyline && (
+            {event.is_sports_games_moneyline && !shouldHideSportsAdminControls && (
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
@@ -246,23 +248,25 @@ export function useAdminEventsColumns({
               </Tooltip>
             )}
 
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="size-8"
-                  onClick={() => onOpenLivestreamModal(event)}
-                  aria-label={event.livestream_url ? t('Edit livestream URL') : t('Add livestream URL')}
-                >
-                  <RadioIcon className={`size-4 ${event.livestream_url ? 'text-red-500' : 'text-muted-foreground'}`} />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                {event.livestream_url ? t('Edit livestream URL') : t('Add livestream URL')}
-              </TooltipContent>
-            </Tooltip>
+            {!shouldHideSportsAdminControls && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="size-8"
+                    onClick={() => onOpenLivestreamModal(event)}
+                    aria-label={event.livestream_url ? t('Edit livestream URL') : t('Add livestream URL')}
+                  >
+                    <RadioIcon className={`size-4 ${event.livestream_url ? 'text-red-500' : 'text-muted-foreground'}`} />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  {event.livestream_url ? t('Edit livestream URL') : t('Add livestream URL')}
+                </TooltipContent>
+              </Tooltip>
+            )}
 
             <Tooltip>
               <TooltipTrigger asChild>
