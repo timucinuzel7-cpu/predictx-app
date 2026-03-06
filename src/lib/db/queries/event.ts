@@ -34,7 +34,7 @@ import {
 import { getPublicAssetUrl } from '@/lib/storage'
 
 type PriceApiResponse = Record<string, { BUY?: string, SELL?: string } | undefined>
-interface OutcomePrices { buy: number, sell: number }
+interface OutcomePrices { buy?: number, sell?: number }
 const MAX_PRICE_BATCH = 500
 
 interface LastTradePriceEntry {
@@ -147,6 +147,55 @@ function normalizeTradePrice(value: string | undefined) {
   return parsed
 }
 
+function invertPrice(value: number | null) {
+  if (value == null) {
+    return null
+  }
+
+  if (value <= 0) {
+    return 1
+  }
+
+  if (value >= 1) {
+    return 0
+  }
+
+  return 1 - value
+}
+
+function resolveOutcomeDisplayPrice(
+  outcome: { buy_price?: number, sell_price?: number } | null | undefined,
+) {
+  return resolveDisplayPrice({
+    bid: outcome?.sell_price ?? null,
+    ask: outcome?.buy_price ?? null,
+    lastTrade: null,
+  })
+}
+
+function resolveMarketDisplayPrice(
+  outcomes: Array<{ outcome_index: number, buy_price?: number, sell_price?: number }>,
+) {
+  const yesOutcome = outcomes.find(outcome => outcome.outcome_index === OUTCOME_INDEX.YES)
+  const noOutcome = outcomes.find(outcome => outcome.outcome_index === OUTCOME_INDEX.NO)
+
+  const directYesDisplayPrice = resolveOutcomeDisplayPrice(yesOutcome)
+  if (directYesDisplayPrice != null) {
+    return directYesDisplayPrice
+  }
+
+  if (yesOutcome && noOutcome) {
+    const noDisplayPrice = resolveOutcomeDisplayPrice(noOutcome)
+    const inferredYesDisplayPrice = invertPrice(noDisplayPrice)
+    if (inferredYesDisplayPrice != null) {
+      return inferredYesDisplayPrice
+    }
+  }
+
+  const primaryOutcome = yesOutcome ?? outcomes[0]
+  return resolveOutcomeDisplayPrice(primaryOutcome) ?? 0.5
+}
+
 async function fetchPriceBatch(endpoint: string, tokenIds: string[]): Promise<FetchPriceBatchResult> {
   try {
     const response = await fetch(endpoint, {
@@ -241,8 +290,8 @@ function applyPriceBatch(
     }
 
     priceMap.set(tokenId, {
-      buy: normalizedSell ?? normalizedBuy ?? 0.5,
-      sell: normalizedBuy ?? normalizedSell ?? 0.5,
+      buy: normalizedSell ?? normalizedBuy,
+      sell: normalizedBuy ?? normalizedSell,
     })
     missingTokenIds.delete(tokenId)
   }
@@ -290,10 +339,6 @@ async function fetchOutcomePrices(tokenIds: string[]): Promise<Map<string, Outco
     if (wasAborted) {
       break
     }
-  }
-
-  for (const tokenId of missingTokenIds) {
-    priceMap.set(tokenId, { buy: 0.5, sell: 0.5 })
   }
 
   return priceMap
@@ -621,23 +666,18 @@ function eventResource(
     const rawOutcomes = (market.condition?.outcomes || []) as Array<typeof outcomes.$inferSelect>
     const normalizedOutcomes = rawOutcomes.map((outcome) => {
       const outcomePrice = outcome.token_id ? priceMap.get(outcome.token_id) : undefined
-      const buyPrice = outcomePrice?.buy ?? 0.5
-      const sellPrice = outcomePrice?.sell ?? 0.5
 
       return {
         ...outcome,
         outcome_index: Number(outcome.outcome_index || 0),
         payout_value: outcome.payout_value != null ? Number(outcome.payout_value) : undefined,
-        buy_price: buyPrice,
-        sell_price: sellPrice,
+        buy_price: outcomePrice?.buy,
+        sell_price: outcomePrice?.sell,
       }
     })
 
-    const primaryOutcome = normalizedOutcomes.find(outcome => outcome.outcome_index === OUTCOME_INDEX.YES) ?? normalizedOutcomes[0]
-    const yesBuyPrice = primaryOutcome?.buy_price ?? 0.5
-    const yesSellPrice = primaryOutcome?.sell_price ?? yesBuyPrice
-    const yesMidPrice = (yesBuyPrice + yesSellPrice) / 2
-    const probability = yesMidPrice * 100
+    const marketDisplayPrice = resolveMarketDisplayPrice(normalizedOutcomes)
+    const probability = marketDisplayPrice * 100
     const normalizedCurrentVolume24h = Number(market.volume_24h || 0)
     const normalizedTotalVolume = Number(market.volume || 0)
 
@@ -651,7 +691,7 @@ function eventResource(
       question_id: market.condition?.question_id || '',
       title: market.short_title || market.title,
       probability,
-      price: yesMidPrice,
+      price: marketDisplayPrice,
       volume: normalizedTotalVolume,
       volume_24h: normalizedCurrentVolume24h,
       outcomes: normalizedOutcomes,
