@@ -1,4 +1,4 @@
-import type { ActivitySort, ActivityTypeFilter, ActivityVariant } from '@/app/[locale]/(platform)/[username]/_types/PublicActivityTypes'
+import type { ActivitySort, ActivityTypeFilter, ActivityVariant } from '@/app/[locale]/(platform)/profile/_types/PublicActivityTypes'
 import type { ActivityOrder } from '@/types'
 import {
   ArrowDownToLineIcon,

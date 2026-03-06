@@ -1,9 +1,9 @@
 'use client'
 
-import type { ActivitySort, ActivityTypeFilter } from '@/app/[locale]/(platform)/[username]/_types/PublicActivityTypes'
+import type { ActivitySort, ActivityTypeFilter } from '@/app/[locale]/(platform)/profile/_types/PublicActivityTypes'
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { usePublicActivityQuery } from '@/app/[locale]/(platform)/[username]/_hooks/usePublicActivityQuery'
-import { buildActivityCsv, getActivityTimestampMs, matchesSearchQuery, matchesTypeFilter, toNumeric } from '@/app/[locale]/(platform)/[username]/_utils/PublicActivityUtils'
+import { usePublicActivityQuery } from '@/app/[locale]/(platform)/profile/_hooks/usePublicActivityQuery'
+import { buildActivityCsv, getActivityTimestampMs, matchesSearchQuery, matchesTypeFilter, toNumeric } from '@/app/[locale]/(platform)/profile/_utils/PublicActivityUtils'
 import { useSiteIdentity } from '@/hooks/useSiteIdentity'
 import PublicActivityFilters from './PublicActivityFilters'
 import PublicActivityTable from './PublicActivityTable'

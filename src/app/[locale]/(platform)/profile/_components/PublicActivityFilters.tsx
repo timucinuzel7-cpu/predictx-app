@@ -1,4 +1,4 @@
-import type { ActivitySort, ActivityTypeFilter } from '@/app/[locale]/(platform)/[username]/_types/PublicActivityTypes'
+import type { ActivitySort, ActivityTypeFilter } from '@/app/[locale]/(platform)/profile/_types/PublicActivityTypes'
 import { ArrowDownNarrowWideIcon, DownloadIcon, ListFilterIcon, SearchIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'

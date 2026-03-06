@@ -1,8 +1,8 @@
 'use client'
 
 import { useLayoutEffect, useMemo, useRef, useState } from 'react'
-import PublicActivityList from '@/app/[locale]/(platform)/[username]/_components/PublicActivityList'
-import PublicPositionsList from '@/app/[locale]/(platform)/[username]/_components/PublicPositionsList'
+import PublicActivityList from '@/app/[locale]/(platform)/profile/_components/PublicActivityList'
+import PublicPositionsList from '@/app/[locale]/(platform)/profile/_components/PublicPositionsList'
 import { cn } from '@/lib/utils'
 
 type TabType = 'positions' | 'activity'

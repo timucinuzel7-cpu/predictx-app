@@ -2,15 +2,19 @@
 
 import type { MergeableMarket } from './MergePositionsDialog'
 import type { PublicPosition } from './PublicPositionItem'
-import type { SortDirection, SortOption } from '@/app/[locale]/(platform)/[username]/_types/PublicPositionsTypes'
+import type { SortDirection, SortOption } from '@/app/[locale]/(platform)/profile/_types/PublicPositionsTypes'
 import type { NormalizedBookLevel } from '@/lib/order-panel-utils'
 import { useAppKitAccount } from '@reown/appkit/react'
 import { useQueryClient } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useSignMessage, useSignTypedData } from 'wagmi'
-import { useMergePositionsAction } from '@/app/[locale]/(platform)/[username]/_hooks/useMergePositionsAction'
-import { usePublicPositionsQuery } from '@/app/[locale]/(platform)/[username]/_hooks/usePublicPositionsQuery'
+import { PositionShareDialog } from '@/app/[locale]/(platform)/_components/PositionShareDialog'
+import SellPositionModal from '@/app/[locale]/(platform)/_components/SellPositionModal'
+import { useTradingOnboarding } from '@/app/[locale]/(platform)/_providers/TradingOnboardingProvider'
+import { handleOrderCancelledFeedback, handleOrderErrorFeedback, handleOrderSuccessFeedback, handleValidationError } from '@/app/[locale]/(platform)/event/[slug]/_components/feedback'
+import { useMergePositionsAction } from '@/app/[locale]/(platform)/profile/_hooks/useMergePositionsAction'
+import { usePublicPositionsQuery } from '@/app/[locale]/(platform)/profile/_hooks/usePublicPositionsQuery'
 import {
   buildMergeableMarkets,
   calculatePositionsTotals,
@@ -19,11 +23,7 @@ import {
   getOutcomeLabel,
   matchesPositionsSearchQuery,
   sortPositions,
-} from '@/app/[locale]/(platform)/[username]/_utils/PublicPositionsUtils'
-import { PositionShareDialog } from '@/app/[locale]/(platform)/_components/PositionShareDialog'
-import SellPositionModal from '@/app/[locale]/(platform)/_components/SellPositionModal'
-import { useTradingOnboarding } from '@/app/[locale]/(platform)/_providers/TradingOnboardingProvider'
-import { handleOrderCancelledFeedback, handleOrderErrorFeedback, handleOrderSuccessFeedback, handleValidationError } from '@/app/[locale]/(platform)/event/[slug]/_components/feedback'
+} from '@/app/[locale]/(platform)/profile/_utils/PublicPositionsUtils'
 import { useAffiliateOrderMetadata } from '@/hooks/useAffiliateOrderMetadata'
 import { useAppKit } from '@/hooks/useAppKit'
 import { useDebounce } from '@/hooks/useDebounce'

@@ -1,7 +1,7 @@
-import type { PublicPosition } from '@/app/[locale]/(platform)/[username]/_components/PublicPositionItem'
-import type { SortDirection, SortOption } from '@/app/[locale]/(platform)/[username]/_types/PublicPositionsTypes'
+import type { PublicPosition } from '@/app/[locale]/(platform)/profile/_components/PublicPositionItem'
+import type { SortDirection, SortOption } from '@/app/[locale]/(platform)/profile/_types/PublicPositionsTypes'
 import { useInfiniteQuery } from '@tanstack/react-query'
-import { isClientOnlySort, mapDataApiPosition, resolvePositionsSearchParams, resolvePositionsSortParams } from '@/app/[locale]/(platform)/[username]/_utils/PublicPositionsUtils'
+import { isClientOnlySort, mapDataApiPosition, resolvePositionsSearchParams, resolvePositionsSortParams } from '@/app/[locale]/(platform)/profile/_utils/PublicPositionsUtils'
 
 const DATA_API_URL = process.env.DATA_URL!
 const UNRESOLVED_STATUS_TTL_MS = 60_000

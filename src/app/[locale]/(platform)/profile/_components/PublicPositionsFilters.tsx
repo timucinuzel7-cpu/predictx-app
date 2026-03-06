@@ -1,4 +1,4 @@
-import type { SortOption } from '@/app/[locale]/(platform)/[username]/_types/PublicPositionsTypes'
+import type { SortOption } from '@/app/[locale]/(platform)/profile/_types/PublicPositionsTypes'
 import { ArrowDownNarrowWideIcon, MergeIcon, SearchIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'

@@ -3,9 +3,9 @@
 import type { Route } from 'next'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
-import PublicActivityList from '@/app/[locale]/(platform)/[username]/_components/PublicActivityList'
-import PublicPositionsList from '@/app/[locale]/(platform)/[username]/_components/PublicPositionsList'
 import PortfolioOpenOrdersList from '@/app/[locale]/(platform)/portfolio/_components/PortfolioOpenOrdersList'
+import PublicActivityList from '@/app/[locale]/(platform)/profile/_components/PublicActivityList'
+import PublicPositionsList from '@/app/[locale]/(platform)/profile/_components/PublicPositionsList'
 import { cn } from '@/lib/utils'
 
 type TabType = 'positions' | 'openOrders' | 'history'

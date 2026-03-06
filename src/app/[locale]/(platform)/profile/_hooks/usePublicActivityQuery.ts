@@ -1,8 +1,8 @@
-import type { ActivitySort, ActivityTypeFilter } from '@/app/[locale]/(platform)/[username]/_types/PublicActivityTypes'
+import type { ActivitySort, ActivityTypeFilter } from '@/app/[locale]/(platform)/profile/_types/PublicActivityTypes'
 import type { DataApiActivity } from '@/lib/data-api/user'
 import type { ActivityOrder } from '@/types'
 import { useInfiniteQuery } from '@tanstack/react-query'
-import { resolveActivitySort, resolveActivityTypeParams } from '@/app/[locale]/(platform)/[username]/_utils/PublicActivityUtils'
+import { resolveActivitySort, resolveActivityTypeParams } from '@/app/[locale]/(platform)/profile/_utils/PublicActivityUtils'
 import { mapDataApiActivityToActivityOrder } from '@/lib/data-api/user'
 
 const DATA_API_URL = process.env.DATA_URL!
