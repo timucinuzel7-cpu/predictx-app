@@ -93,7 +93,11 @@ function getNewBadgeWindowMs(seriesRecurrence: string | null | undefined): numbe
   return EVENT_NEW_BADGE_WINDOW_MS_DEFAULT
 }
 
-export function shouldShowEventNewBadge(event: EventNewBadgeInput, currentTime: number = Date.now()) {
+export function shouldShowEventNewBadge(event: EventNewBadgeInput, currentTime: number | null) {
+  if (currentTime == null) {
+    return false
+  }
+
   if (event.status !== 'active') {
     return false
   }

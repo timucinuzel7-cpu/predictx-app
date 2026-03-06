@@ -7,6 +7,7 @@ import { useEffect } from 'react'
 import EventIconImage, { isEventMarketIconUrl } from '@/components/EventIconImage'
 import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import { useCurrentTimestamp } from '@/hooks/useCurrentTimestamp'
 import { getAvatarPlaceholderStyle } from '@/lib/avatar'
 import { cn } from '@/lib/utils'
 import {
@@ -18,7 +19,7 @@ import {
   useUnreadNotificationCount,
 } from '@/stores/useNotifications'
 
-function getNotificationTimeLabel(notification: Notification) {
+function getNotificationTimeLabel(notification: Notification, currentTimestamp: number | null) {
   if (notification.time_ago) {
     return notification.time_ago
   }
@@ -29,7 +30,11 @@ function getNotificationTimeLabel(notification: Notification) {
     return ''
   }
 
-  const diffMs = Math.max(0, Date.now() - createdAt.getTime())
+  if (currentTimestamp == null) {
+    return ''
+  }
+
+  const diffMs = Math.max(0, currentTimestamp - createdAt.getTime())
   const diffMinutes = Math.floor(diffMs / (1000 * 60))
 
   if (diffMinutes < 1) {
@@ -70,6 +75,7 @@ function getNotificationTimeLabel(notification: Notification) {
 
 export default function HeaderNotifications() {
   const notifications = useNotificationList()
+  const currentTimestamp = useCurrentTimestamp({ intervalMs: 60_000 })
   const unreadCount = useUnreadNotificationCount()
   const setNotifications = useNotifications(state => state.setNotifications)
   const removeNotification = useNotifications(state => state.removeNotification)
@@ -146,7 +152,7 @@ export default function HeaderNotifications() {
           {!isLoading && hasNotifications && (
             <div className="divide-y divide-border">
               {notifications.map((notification) => {
-                const timeLabel = getNotificationTimeLabel(notification)
+                const timeLabel = getNotificationTimeLabel(notification, currentTimestamp)
                 const hasLink = Boolean(notification.link_url)
                 const linkIsExternal = notification.link_type === 'external'
                 const isLocalOrderFill = isLocalOrderFillNotification(notification)

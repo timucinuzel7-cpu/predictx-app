@@ -35,7 +35,7 @@ export function usePortfolioValue(
   } = useQuery({
     queryKey: ['portfolio-value', targetWallet],
     enabled: Boolean(targetWallet),
-    staleTime: 10_000,
+    staleTime: 'static',
     gcTime: 5 * 60 * 1000,
     refetchInterval: 10_000,
     refetchIntervalInBackground: true,

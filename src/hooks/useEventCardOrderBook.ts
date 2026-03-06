@@ -6,7 +6,7 @@ export function useEventCardOrderBook(selectedTokenId: string | null, enabled: b
     queryKey: ['card-orderbook', selectedTokenId],
     enabled: Boolean(selectedTokenId && enabled),
     queryFn: () => fetchOrderBookSummary(selectedTokenId!),
-    staleTime: 60_000,
+    staleTime: 'static',
     gcTime: 60_000,
     refetchOnWindowFocus: false,
   })

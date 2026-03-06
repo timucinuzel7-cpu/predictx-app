@@ -19,6 +19,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Skeleton } from '@/components/ui/skeleton'
 import { Link, useRouter } from '@/i18n/navigation'
 import { formatCurrency } from '@/lib/formatters'
+import { buildPublicProfilePath } from '@/lib/platform-routing'
 import { cn } from '@/lib/utils'
 import { useUser } from '@/stores/useUser'
 
@@ -635,7 +636,7 @@ export default function LeaderboardClient({ initialFilters }: { initialFilters: 
                   const isWalletAlias = rawUsername.startsWith('0x') && rawUsername.includes('...')
                   const username = (isWalletAlias && address ? address : rawUsername) || address || ''
                   const profileSlug = address || username
-                  const profileHref = profileSlug ? `/profile/${profileSlug}` : undefined
+                  const profileHref = profileSlug ? buildPublicProfilePath(profileSlug) ?? undefined : undefined
                   const profitValue = Number(entry.pnl ?? 0)
                   const volumeValue = Number(entry.vol ?? 0)
                   const profitLabel = formatSignedCurrency(profitValue)
@@ -708,7 +709,9 @@ export default function LeaderboardClient({ initialFilters }: { initialFilters: 
                           address: pinnedEntry.address,
                         }}
                         profileSlug={pinnedEntry.address || pinnedEntry.username}
-                        profileHref={pinnedEntry.address || pinnedEntry.username ? `/profile/${pinnedEntry.address || pinnedEntry.username}` : undefined}
+                        profileHref={pinnedEntry.address || pinnedEntry.username
+                          ? buildPublicProfilePath(pinnedEntry.address || pinnedEntry.username) ?? undefined
+                          : undefined}
                         layout="inline"
                         containerClassName="min-w-0 gap-3 text-base leading-tight [&_[data-avatar]]:h-10 [&_[data-avatar]]:w-10"
                         avatarSize={40}
@@ -891,7 +894,7 @@ export default function LeaderboardClient({ initialFilters }: { initialFilters: 
                 ])
 
                 const profileSlug = address || username
-                const profileHref = profileSlug ? `/profile/${profileSlug}` : undefined
+                const profileHref = profileSlug ? buildPublicProfilePath(profileSlug) ?? undefined : undefined
                 const eventHref = eventSlug
                   ? (marketSlug ? `/event/${eventSlug}/${marketSlug}` : `/event/${eventSlug}`)
                   : null

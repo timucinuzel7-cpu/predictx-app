@@ -4,6 +4,7 @@ export interface EventCardProps {
   event: Event
   priceOverridesByMarket?: Record<string, number>
   enableHomeSportsMoneylineLayout?: boolean
+  currentTimestamp?: number | null
 }
 
 export interface SelectedOutcome {

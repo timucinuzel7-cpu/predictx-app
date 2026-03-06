@@ -35,7 +35,7 @@ export function useAffiliateOrderMetadata(): AffiliateInfoResponse {
   const { data } = useQuery({
     queryKey: ['affiliate-order-info'],
     queryFn: fetchAffiliateInfo,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 'static',
     gcTime: 10 * 60 * 1000,
   })
 

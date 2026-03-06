@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { useClipboard } from '@/hooks/useClipboard'
 import { formatCurrency, formatPercent } from '@/lib/formatters'
+import { buildPublicProfilePath } from '@/lib/platform-routing'
 
 interface AffiliateMainCategory {
   slug: string
@@ -156,7 +157,7 @@ export default function SettingsAffiliateContent({ affiliateData, mainCategories
                     address: referral.address,
                     proxy_wallet_address: referral.proxy_wallet_address ?? null,
                   }}
-                  profileHref={profileSlug ? `/profile/${profileSlug}` : undefined}
+                  profileHref={profileSlug ? buildPublicProfilePath(profileSlug) ?? undefined : undefined}
                   layout="stacked"
                   avatarSize={32}
                   containerClassName="gap-3"

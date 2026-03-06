@@ -2,14 +2,13 @@
 
 import type { Route } from 'next'
 import type { ReactNode } from 'react'
-import type { CategoryPathSidebarSlug } from '@/lib/constants'
 import { useExtracted } from 'next-intl'
 import { Link } from '@/i18n/navigation'
 import { cn } from '@/lib/utils'
 
 interface CategorySidebarProps {
   activeSubcategorySlug: string | null
-  categorySlug: CategoryPathSidebarSlug
+  categorySlug: string
   categoryTitle: string
   onNavigate: (targetTag: string) => void
   subcategories: { name: string, slug: string }[]

@@ -14,11 +14,12 @@ interface EventCardSportsMoneylineProps {
   event: Event
   model: HomeSportsMoneylineModel
   getDisplayChance: (marketId: string) => number
+  currentTimestamp?: number | null
 }
 
 const HOME_OUTCOME_BUTTON_HEIGHT_CLASS = 'h-[40px]'
 
-function formatSportsStartTime(value: string | null | undefined) {
+function formatSportsStartTime(value: string | null | undefined, currentTimestamp?: number | null) {
   if (!value) {
     return null
   }
@@ -33,7 +34,15 @@ function formatSportsStartTime(value: string | null | undefined) {
     minute: '2-digit',
   })
 
-  const now = new Date()
+  if (currentTimestamp == null) {
+    const dateLabel = parsed.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+    })
+    return `${dateLabel} ${timeLabel}`
+  }
+
+  const now = new Date(currentTimestamp)
   const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate())
   const startOfTarget = new Date(parsed.getFullYear(), parsed.getMonth(), parsed.getDate())
   const dayDiff = Math.round((startOfTarget.getTime() - startOfToday.getTime()) / 86_400_000)
@@ -87,6 +96,7 @@ export default function EventCardSportsMoneyline({
   event,
   model,
   getDisplayChance,
+  currentTimestamp,
 }: EventCardSportsMoneylineProps) {
   const eventHref = resolveEventPagePath(event)
   const marketSlugByConditionId = new Map(
@@ -100,7 +110,7 @@ export default function EventCardSportsMoneyline({
   }
   const isResolvedEvent = event.status === 'resolved'
   const sportsTagLabel = event.sports_sport_slug?.trim()?.toUpperCase() || null
-  const startTimeLabel = formatSportsStartTime(event.sports_start_time ?? event.start_date)
+  const startTimeLabel = formatSportsStartTime(event.sports_start_time ?? event.start_date, currentTimestamp)
   const team1Chance = Math.round(getDisplayChance(model.team1Button.conditionId))
   const team2Chance = Math.round(getDisplayChance(model.team2Button.conditionId))
 

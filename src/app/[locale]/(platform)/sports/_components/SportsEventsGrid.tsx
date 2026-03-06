@@ -15,6 +15,7 @@ import { useEventLastTrades } from '@/app/[locale]/(platform)/event/[slug]/_hook
 import { useEventMarketQuotes } from '@/app/[locale]/(platform)/event/[slug]/_hooks/useEventMidPrices'
 import { buildMarketTargets } from '@/app/[locale]/(platform)/event/[slug]/_hooks/useEventPriceHistory'
 import { useColumns } from '@/hooks/useColumns'
+import { useCurrentTimestamp } from '@/hooks/useCurrentTimestamp'
 import { resolveDisplayPrice } from '@/lib/market-chance'
 import { cn } from '@/lib/utils'
 import { useUser } from '@/stores/useUser'
@@ -204,7 +205,7 @@ export default function SportsEventsGrid({
   const [hasInitialized, setHasInitialized] = useState(false)
   const [scrollMargin, setScrollMargin] = useState(0)
   const [sportsMode, setSportsMode] = useState<SportsSidebarMode>(initialMode)
-  const [currentTimestamp, setCurrentTimestamp] = useState<number | null>(null)
+  const currentTimestamp = useCurrentTimestamp({ intervalMs: 60_000 })
   const PAGE_SIZE = 40
   const normalizedSportsSportSlug = sportsSportSlug?.trim().toLowerCase() || null
   const isDefaultState = filters.search === ''
@@ -271,16 +272,6 @@ export default function SportsEventsGrid({
   useEffect(() => {
     setSportsMode(initialMode)
   }, [initialMode])
-
-  useEffect(() => {
-    setCurrentTimestamp(Date.now())
-
-    const interval = window.setInterval(() => {
-      setCurrentTimestamp(Date.now())
-    }, 60_000)
-
-    return () => window.clearInterval(interval)
-  }, [])
 
   const allEvents = useMemo(() => (data ? data.pages.flat() : []), [data])
 
@@ -510,6 +501,7 @@ export default function SportsEventsGrid({
                     event={event}
                     priceOverridesByMarket={priceOverridesByMarket}
                     enableHomeSportsMoneylineLayout={false}
+                    currentTimestamp={currentTimestamp}
                   />
                 ))}
                 {isFetchingNextPage && isLastVirtualRow && <EventCardSkeleton />}

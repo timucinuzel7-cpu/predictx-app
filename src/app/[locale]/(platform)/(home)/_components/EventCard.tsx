@@ -46,6 +46,7 @@ export default function EventCard({
   event,
   priceOverridesByMarket = EMPTY_PRICE_OVERRIDES,
   enableHomeSportsMoneylineLayout = false,
+  currentTimestamp = null,
 }: EventCardProps) {
   const { openCardId, setOpenCardId } = use(OpenCardContext)
   const [isLoading, setIsLoading] = useState(false)
@@ -90,7 +91,7 @@ export default function EventCard({
   const primaryMarket = marketsToDisplay[0]
   const yesOutcome = primaryMarket?.outcomes[0]
   const noOutcome = primaryMarket?.outcomes[1]
-  const shouldShowNewBadge = shouldShowEventNewBadge(event)
+  const shouldShowNewBadge = shouldShowEventNewBadge(event, currentTimestamp)
   const shouldShowLiveBadge = !isResolvedEvent && Boolean(event.has_live_chart)
   const isNegRiskEnabled = Boolean(event.enable_neg_risk)
   const orderDomain = useMemo(() => getExchangeEip712Domain(isNegRiskEnabled), [isNegRiskEnabled])
@@ -303,6 +304,7 @@ export default function EventCard({
         event={event}
         model={homeSportsMoneylineModel}
         getDisplayChance={getDisplayChance}
+        currentTimestamp={currentTimestamp}
       />
     )
   }

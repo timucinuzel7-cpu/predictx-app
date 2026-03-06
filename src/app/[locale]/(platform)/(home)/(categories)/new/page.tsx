@@ -3,12 +3,12 @@
 import type { Metadata } from 'next'
 import { setRequestLocale } from 'next-intl/server'
 import HomeContent from '@/app/[locale]/(platform)/(home)/_components/HomeContent'
-import { getCategorySeoTitle } from '@/lib/constants'
+import { getNewPageSeoTitle } from '@/lib/platform-routing'
 
 const MAIN_TAG_SLUG = 'new' as const
 
 export const metadata: Metadata = {
-  title: getCategorySeoTitle(MAIN_TAG_SLUG),
+  title: getNewPageSeoTitle(),
 }
 
 export default async function NewPage({ params }: PageProps<'/[locale]/new'>) {

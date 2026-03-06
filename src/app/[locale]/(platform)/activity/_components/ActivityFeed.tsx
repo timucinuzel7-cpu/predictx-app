@@ -17,6 +17,7 @@ import { MICRO_UNIT } from '@/lib/constants'
 import { mapDataApiActivityToActivityOrder } from '@/lib/data-api/user'
 import { formatCurrency, formatSharePriceLabel, formatTimeAgo, toMicro } from '@/lib/formatters'
 import { POLYGON_SCAN_BASE } from '@/lib/network'
+import { buildPublicProfilePath } from '@/lib/platform-routing'
 import { cn } from '@/lib/utils'
 
 type LiveActivityPayload = DataApiActivity & {
@@ -599,7 +600,9 @@ export default function ActivityFeed() {
                         }}
                         avatarSize={24}
                         profileSlug={activity.user.address || username}
-                        profileHref={activity.user.address || username ? `/profile/${activity.user.address || username}` : undefined}
+                        profileHref={activity.user.address || username
+                          ? buildPublicProfilePath(activity.user.address || username) ?? undefined
+                          : undefined}
                         layout="inline"
                         containerClassName="gap-2 text-sm leading-tight [&_[data-avatar]]:h-6 [&_[data-avatar]]:w-6"
                         usernameClassName="font-semibold text-foreground underline-offset-2 hover:underline"

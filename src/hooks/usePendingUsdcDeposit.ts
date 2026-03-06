@@ -81,7 +81,7 @@ export function usePendingUsdcDeposit(options: UsePendingUsdcDepositOptions = {}
   } = useQuery({
     queryKey: [PENDING_USDC_QUERY_KEY, proxyWalletAddress, tokenAddress],
     enabled: isQueryEnabled,
-    staleTime: 60_000,
+    staleTime: 'static',
     gcTime: 5 * 60 * 1000,
     refetchInterval: 60_000,
     refetchIntervalInBackground: true,

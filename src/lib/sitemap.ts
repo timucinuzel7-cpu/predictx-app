@@ -2,11 +2,11 @@ import { and, desc, eq, exists, inArray, sql } from 'drizzle-orm'
 import { cacheTag } from 'next/cache'
 import { DEFAULT_LOCALE } from '@/i18n/locales'
 import { cacheTags } from '@/lib/cache-tags'
-import { CATEGORY_PATH_SLUG_SET } from '@/lib/constants'
 import { TagRepository } from '@/lib/db/queries/tag'
 import { event_sports, event_tags, events, markets, tags } from '@/lib/db/schema/events/tables'
 import { db } from '@/lib/drizzle'
 import { resolveEventMarketPath, resolveEventPagePath } from '@/lib/events-routing'
+import { isDynamicHomeCategorySlug } from '@/lib/platform-routing'
 
 const STATIC_SITEMAP_IDS = [
   'base',
@@ -335,7 +335,7 @@ function resolveCategoryPath(slug: string): string | null {
     return '/sports'
   }
 
-  if (CATEGORY_PATH_SLUG_SET.has(normalizedSlug)) {
+  if (isDynamicHomeCategorySlug(normalizedSlug)) {
     return `/${normalizedSlug}`
   }
 

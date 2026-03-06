@@ -25,6 +25,7 @@ import { Link } from '@/i18n/navigation'
 import { defaultNetwork } from '@/lib/appkit'
 import { DEFAULT_ERROR_MESSAGE } from '@/lib/constants'
 import { formatCurrency, formatPercent } from '@/lib/formatters'
+import { buildPublicProfilePath } from '@/lib/platform-routing'
 import {
   aggregateSafeTransactions,
   buildRedeemPositionTransaction,
@@ -120,7 +121,7 @@ export default function PortfolioMarketsWonCardClient({ data }: PortfolioMarkets
     try {
       const profileSlug = user?.username?.trim() || user?.proxy_wallet_address?.trim() || ''
       const shareTargetUrl = profileSlug
-        ? `${window.location.origin}/@${encodeURIComponent(profileSlug)}`
+        ? new URL(buildPublicProfilePath(profileSlug) ?? '/', window.location.origin).toString()
         : window.location.origin
       const shareText = [
         `I just won ${formatCurrency(summary.totalProceeds)} on ${siteName}!`,

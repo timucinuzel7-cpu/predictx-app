@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { NewBadge } from '@/components/ui/new-badge'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { useCurrentTimestamp } from '@/hooks/useCurrentTimestamp'
 import { Link } from '@/i18n/navigation'
 import { formatVolume } from '@/lib/formatters'
 import { cn, isMarketNew } from '@/lib/utils'
@@ -37,6 +38,7 @@ interface MentionsListItemProps {
 }
 
 function MentionsListItem({ event }: MentionsListItemProps) {
+  const currentTimestamp = useCurrentTimestamp({ intervalMs: 60_000 })
   const parsedEndDate = event.end_date ? new Date(event.end_date) : null
   const hasValidEndDate = parsedEndDate && !Number.isNaN(parsedEndDate.getTime())
   const eventDate = hasValidEndDate ? parsedEndDate : null
@@ -56,7 +58,7 @@ function MentionsListItem({ event }: MentionsListItemProps) {
   const visibleBadges = marketBadges.slice(0, 2)
   const hiddenBadges = marketBadges.slice(2)
 
-  const hasRecentMarket = event.markets.some(market => isMarketNew(market.created_at))
+  const hasRecentMarket = event.markets.some(market => isMarketNew(market.created_at, undefined, currentTimestamp ?? undefined))
   const totalVolume = event.markets.reduce((acc, market) => acc + (market.volume ?? 0), 0)
 
   const statusBadge = hasRecentMarket

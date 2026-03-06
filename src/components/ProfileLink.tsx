@@ -13,6 +13,7 @@ import {
 } from '@/lib/avatar'
 import { fetchProfileLinkStats } from '@/lib/data-api/profile-link-stats'
 import { formatTimeAgo, truncateAddress } from '@/lib/formatters'
+import { buildPublicProfilePath } from '@/lib/platform-routing'
 import { cn } from '@/lib/utils'
 
 interface ProfileLinkProps {
@@ -90,7 +91,7 @@ export default function ProfileLink({
   const resolvedProfileSlug = profileSlug ?? (normalizedUsername || addressSlug)
   const profileHref = profileHrefOverride
     ? (profileHrefOverride as any)
-    : (resolvedProfileSlug ? (`/@${resolvedProfileSlug}` as any) : ('#' as any))
+    : (resolvedProfileSlug ? ((buildPublicProfilePath(resolvedProfileSlug) ?? '#') as any) : ('#' as any))
   const rawAvatarUrl = user.image?.trim() ?? ''
   const avatarSeed = addressSlug || resolvedProfileSlug || 'user'
   const hasCustomAvatar = Boolean(rawAvatarUrl)

@@ -78,7 +78,7 @@ export function useBalance(options: UseBalanceOptions = {}) {
   } = useQuery({
     queryKey: [SAFE_BALANCE_QUERY_KEY, proxyWalletAddress],
     enabled: isQueryEnabled,
-    staleTime: 10_000,
+    staleTime: 'static',
     gcTime: 5 * 60 * 1000,
     refetchInterval: 10_000,
     refetchIntervalInBackground: true,

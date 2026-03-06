@@ -78,7 +78,7 @@ export function useEventLastTrades(targets: MarketTokenTarget[]) {
     queryKey: ['event-last-trades', tokenSignature],
     queryFn: () => fetchLastTradesByMarket(targets),
     enabled: targets.length > 0,
-    staleTime: LAST_TRADE_REFRESH_INTERVAL_MS,
+    staleTime: 'static',
     gcTime: LAST_TRADE_REFRESH_INTERVAL_MS,
     refetchInterval: LAST_TRADE_REFRESH_INTERVAL_MS,
     refetchIntervalInBackground: true,

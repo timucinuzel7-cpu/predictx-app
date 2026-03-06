@@ -1,50 +1,40 @@
-'use cache'
-
 import type { Metadata } from 'next'
-import { setRequestLocale } from 'next-intl/server'
 import { notFound } from 'next/navigation'
 import PublicProfileHeroCards from '@/app/[locale]/(platform)/[username]/_components/PublicProfileHeroCards'
 import PublicProfileTabs from '@/app/[locale]/(platform)/[username]/_components/PublicProfileTabs'
 import { UserRepository } from '@/lib/db/queries/user'
 import { truncateAddress } from '@/lib/formatters'
+import { normalizePublicProfileSlug } from '@/lib/platform-routing'
 import { fetchPortfolioSnapshot } from '@/lib/portfolio'
-import { STATIC_PARAMS_PLACEHOLDER } from '@/lib/static-params'
-import { normalizeAddress } from '@/lib/wallet'
 
-export async function generateMetadata({ params }: PageProps<'/[locale]/[username]'>): Promise<Metadata> {
-  const { locale, username } = await params
-  setRequestLocale(locale)
-  if (username === STATIC_PARAMS_PLACEHOLDER) {
-    notFound()
-  }
+export function buildPublicProfileMetadata(slug: string): Metadata {
+  const normalized = normalizePublicProfileSlug(slug)
 
-  const isUsername = !username.startsWith('0x')
-  const displayName = isUsername ? username : truncateAddress(username)
+  const displayName = normalized.type === 'address'
+    ? truncateAddress(normalized.value)
+    : normalized.type === 'username'
+      ? normalized.value
+      : slug
 
   return {
     title: `${displayName} - Profile`,
   }
 }
 
-export async function generateStaticParams() {
-  return [{ username: STATIC_PARAMS_PLACEHOLDER }]
-}
-
-export default async function ProfilePage({ params }: PageProps<'/[locale]/[username]'>) {
-  const { locale, username } = await params
-  setRequestLocale(locale)
-  if (username === STATIC_PARAMS_PLACEHOLDER) {
+export async function PublicProfilePageContent({ slug }: { slug: string }) {
+  const normalized = normalizePublicProfileSlug(slug)
+  if (normalized.type === 'invalid') {
     notFound()
   }
 
-  const { data: profile } = await UserRepository.getProfileByUsernameOrProxyAddress(username)
+  const { data: profile } = await UserRepository.getProfileByUsernameOrProxyAddress(normalized.value)
+
   if (!profile) {
-    const normalizedAddress = normalizeAddress(username)
-    if (!normalizedAddress) {
+    if (normalized.type === 'username') {
       notFound()
     }
 
-    const snapshot = await fetchPortfolioSnapshot(normalizedAddress)
+    const snapshot = await fetchPortfolioSnapshot(normalized.value)
 
     return (
       <>
@@ -53,11 +43,11 @@ export default async function ProfilePage({ params }: PageProps<'/[locale]/[user
             username: 'Anon',
             avatarUrl: '',
             joinedAt: undefined,
-            portfolioAddress: normalizedAddress,
+            portfolioAddress: normalized.value,
           }}
           snapshot={snapshot}
         />
-        <PublicProfileTabs userAddress={normalizedAddress} />
+        <PublicProfileTabs userAddress={normalized.value} />
       </>
     )
   }

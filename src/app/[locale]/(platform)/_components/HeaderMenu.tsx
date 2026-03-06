@@ -20,8 +20,25 @@ import { useUser } from '@/stores/useUser'
 const { useSession } = authClient
 
 export default function HeaderMenu() {
-  const t = useExtracted()
   const isMounted = useClientMounted()
+
+  if (!isMounted) {
+    return (
+      <div className="flex gap-2">
+        <Skeleton className="hidden h-9 w-18 lg:block" />
+        <Skeleton className="hidden h-9 w-18 lg:block" />
+        <Skeleton className="hidden h-9 w-20 lg:block" />
+        <Skeleton className="size-9" />
+        <Skeleton className="h-9 w-18" />
+      </div>
+    )
+  }
+
+  return <HeaderMenuClient />
+}
+
+function HeaderMenuClient() {
+  const t = useExtracted()
   const { open, isReady } = useAppKit()
   const { isConnected, status } = useAppKitAccount()
   const { data: session, isPending } = useSession()
@@ -55,7 +72,7 @@ export default function HeaderMenu() {
 
   const isAuthenticated = Boolean(user) || isConnected
   const shouldWaitForAppKit = Boolean(session?.user) && (status === 'connecting' || !isReady)
-  const showSkeleton = !user && (isPending || !isMounted || shouldWaitForAppKit)
+  const showSkeleton = !user && (isPending || shouldWaitForAppKit)
 
   if (showSkeleton) {
     return (

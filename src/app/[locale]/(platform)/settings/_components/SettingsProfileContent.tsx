@@ -20,6 +20,7 @@ import {
   ensureCommunityToken,
   parseCommunityError,
 } from '@/lib/community-auth'
+import { buildPublicProfilePath } from '@/lib/platform-routing'
 import { useUser } from '@/stores/useUser'
 
 export default function SettingsProfileContent({ user }: { user: User }) {
@@ -284,7 +285,7 @@ export default function SettingsProfileContent({ user }: { user: User }) {
 
         <div className="flex items-center justify-between gap-3">
           <Link
-            href={user.username ? `/@${user.username}` : `/@${user.proxy_wallet_address}`}
+            href={buildPublicProfilePath(user.username || user.proxy_wallet_address || '') || '#'}
             className="text-sm font-medium text-primary transition-colors hover:text-primary/80 hover:underline"
           >
             {t('View Public Profile')}

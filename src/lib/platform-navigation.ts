@@ -1,6 +1,3 @@
-import type { CategoryPathSlug } from '@/lib/constants'
-import { isCategoryPathSlug } from '@/lib/constants'
-
 export interface PlatformNavigationChild {
   name: string
   slug: string
@@ -18,8 +15,6 @@ export interface PlatformNavigationFilters {
   bookmarked: boolean
 }
 
-export type PlatformMainTagPathSlug = CategoryPathSlug | 'sports'
-
 export interface PlatformPathState {
   isEventPathPage: boolean
   isHomeLikePage: boolean
@@ -27,7 +22,7 @@ export interface PlatformPathState {
   isMainTagPathPage: boolean
   isMentionsPage: boolean
   isSportsPathPage: boolean
-  selectedMainTagPathSlug: PlatformMainTagPathSlug | null
+  selectedMainTagPathSlug: string | null
   selectedSubtagPathSlug: string | null
 }
 
@@ -69,7 +64,7 @@ export function buildPlatformNavigationTags({
   ]
 }
 
-export function parsePlatformPathname(pathname: string): PlatformPathState {
+export function parsePlatformPathname(pathname: string, dynamicHomeCategorySlugSet: ReadonlySet<string>): PlatformPathState {
   const pathSegments = pathname.split('/').filter(Boolean)
   const isHomePage = pathname === '/'
   const isMentionsPage = pathname === '/mentions'
@@ -102,7 +97,10 @@ export function parsePlatformPathname(pathname: string): PlatformPathState {
     }
   }
 
-  if (!isCategoryPathSlug(candidate)) {
+  const isDynamicHomeCategoryPath = dynamicHomeCategorySlugSet.has(candidate)
+  const isNewPath = candidate === 'new'
+
+  if (!isDynamicHomeCategoryPath && !isNewPath) {
     return {
       isEventPathPage,
       isHomeLikePage: isHomePage,
@@ -128,15 +126,17 @@ export function parsePlatformPathname(pathname: string): PlatformPathState {
 }
 
 export function resolvePlatformNavigationSelection({
+  dynamicHomeCategorySlugSet,
   pathname,
   filters,
   childParentMap,
 }: {
   childParentMap: Record<string, string>
+  dynamicHomeCategorySlugSet: ReadonlySet<string>
   filters: PlatformNavigationFilters
   pathname: string
 }): ResolvedPlatformNavigationSelection {
-  const pathState = parsePlatformPathname(pathname)
+  const pathState = parsePlatformPathname(pathname, dynamicHomeCategorySlugSet)
   const showBookmarkedOnly = pathState.isHomeLikePage ? filters.bookmarked : false
   const rawTagFromFilters = pathState.isHomeLikePage
     ? (showBookmarkedOnly && filters.tag === 'trending' ? '' : filters.tag)

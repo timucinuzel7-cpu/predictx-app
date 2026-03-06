@@ -9,6 +9,7 @@ import ProfileLink from '@/components/ProfileLink'
 import { DropdownMenu, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { useAppKit } from '@/hooks/useAppKit'
 import { Link } from '@/i18n/navigation'
+import { buildPublicProfilePath } from '@/lib/platform-routing'
 import EventCommentLikeForm from './EventCommentLikeForm'
 import EventCommentMenu from './EventCommentMenu'
 import EventCommentReplyForm from './EventCommentReplyForm'
@@ -54,7 +55,7 @@ export default function EventCommentReplyItem({
 }: ReplyItemProps) {
   const { open } = useAppKit()
   const { displayName, profileSlug } = resolveCommentUserIdentity(reply)
-  const parentHref = parentProfileSlug ? (`/@${parentProfileSlug}` as any) : ('#' as any)
+  const parentHref = parentProfileSlug ? ((buildPublicProfilePath(parentProfileSlug) ?? '#') as any) : ('#' as any)
   const t = useExtracted()
 
   const handleReplyClick = useCallback(() => {

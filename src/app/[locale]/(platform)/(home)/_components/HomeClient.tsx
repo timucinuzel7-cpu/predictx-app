@@ -11,8 +11,8 @@ import HomeSecondaryNavigation from '@/app/[locale]/(platform)/(home)/_component
 import { useFilters } from '@/app/[locale]/(platform)/_providers/FilterProvider'
 import { usePlatformNavigationData } from '@/app/[locale]/(platform)/_providers/PlatformNavigationProvider'
 import { usePathname, useRouter } from '@/i18n/navigation'
-import { isCategoryPathSidebarSlug, isCategoryPathSlug } from '@/lib/constants'
 import { resolvePlatformNavigationSelection } from '@/lib/platform-navigation'
+import { buildDynamicHomeCategorySlugSet } from '@/lib/platform-routing'
 
 interface HomeClientProps {
   initialEvents: Event[]
@@ -30,6 +30,7 @@ export default function HomeClient({
   const { filters, updateFilters } = useFilters()
   const { tags, childParentMap } = usePlatformNavigationData()
   const lastAppliedInitialFiltersRef = useRef<string | null>(null)
+  const dynamicHomeCategorySlugSet = useMemo(() => buildDynamicHomeCategorySlugSet(tags), [tags])
 
   useEffect(() => {
     const targetTag = initialTag ?? 'trending'
@@ -45,6 +46,7 @@ export default function HomeClient({
   }, [initialMainTag, initialTag, updateFilters])
 
   const navigationSelection = useMemo(() => resolvePlatformNavigationSelection({
+    dynamicHomeCategorySlugSet,
     pathname,
     filters: {
       tag: filters.tag,
@@ -52,7 +54,7 @@ export default function HomeClient({
       bookmarked: filters.bookmarked,
     },
     childParentMap,
-  }), [childParentMap, filters.bookmarked, filters.mainTag, filters.tag, pathname])
+  }), [childParentMap, dynamicHomeCategorySlugSet, filters.bookmarked, filters.mainTag, filters.tag, pathname])
 
   const activeNavigationTag = useMemo(
     () => tags.find(tag => tag.slug === navigationSelection.activeMainTagSlug) ?? null,
@@ -63,11 +65,11 @@ export default function HomeClient({
     activeNavigationTag !== null
     && navigationSelection.pathState.isMainTagPathPage
     && navigationSelection.pathState.selectedMainTagPathSlug === activeNavigationTag.slug
-    && isCategoryPathSlug(activeNavigationTag.slug)
-  ), [activeNavigationTag, navigationSelection.pathState.isMainTagPathPage, navigationSelection.pathState.selectedMainTagPathSlug])
+    && dynamicHomeCategorySlugSet.has(activeNavigationTag.slug)
+  ), [activeNavigationTag, dynamicHomeCategorySlugSet, navigationSelection.pathState.isMainTagPathPage, navigationSelection.pathState.selectedMainTagPathSlug])
 
   const categorySidebar = useMemo(() => {
-    if (!activeNavigationTag || !showCategoryPathTitle || !isCategoryPathSidebarSlug(activeNavigationTag.slug)) {
+    if (!activeNavigationTag || !showCategoryPathTitle || !dynamicHomeCategorySlugSet.has(activeNavigationTag.slug)) {
       return null
     }
 
@@ -76,7 +78,7 @@ export default function HomeClient({
       title: activeNavigationTag.name,
       childs: activeNavigationTag.childs,
     }
-  }, [activeNavigationTag, showCategoryPathTitle])
+  }, [activeNavigationTag, dynamicHomeCategorySlugSet, showCategoryPathTitle])
 
   const hasCategorySidebar = categorySidebar !== null
   const shouldUsePathSubcategoryNavigation = hasCategorySidebar

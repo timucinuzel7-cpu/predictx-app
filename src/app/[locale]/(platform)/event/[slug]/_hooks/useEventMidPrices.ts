@@ -135,7 +135,7 @@ export function useEventMarketQuotes(targets: MarketTokenTarget[]) {
     queryKey: ['event-market-quotes', tokenSignature],
     queryFn: () => fetchQuotesByMarket(targets),
     enabled: targets.length > 0,
-    staleTime: PRICE_REFRESH_INTERVAL_MS,
+    staleTime: 'static',
     gcTime: PRICE_REFRESH_INTERVAL_MS,
     refetchInterval: PRICE_REFRESH_INTERVAL_MS,
     refetchIntervalInBackground: true,
