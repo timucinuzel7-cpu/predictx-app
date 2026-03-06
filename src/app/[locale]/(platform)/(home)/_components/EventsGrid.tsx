@@ -75,6 +75,10 @@ function isResolvedLike(event: Event) {
   return event.markets.every(market => market.is_resolved)
 }
 
+function isOverdueUnresolved(event: Event, nowMs: number) {
+  return !isResolvedLike(event) && toTimestamp(event.end_date) < nowMs
+}
+
 function isMoreMarketsEvent(event: Event) {
   return MORE_MARKETS_SUFFIX_REGEX.test(event.slug)
 }
@@ -86,6 +90,21 @@ function isPreferredSeriesEvent(candidate: Event, current: Event, nowMs: number)
   const currentHasFutureEnd = currentEnd >= nowMs
   const candidateResolved = isResolvedLike(candidate)
   const currentResolved = isResolvedLike(current)
+  const candidateOverdueUnresolved = isOverdueUnresolved(candidate, nowMs)
+  const currentOverdueUnresolved = isOverdueUnresolved(current, nowMs)
+
+  if (candidateOverdueUnresolved || currentOverdueUnresolved) {
+    if (candidateOverdueUnresolved !== currentOverdueUnresolved) {
+      return candidateOverdueUnresolved
+    }
+
+    if (candidateEnd !== currentEnd) {
+      // If multiple series entries are overdue and unresolved, keep the most recent cycle.
+      return candidateEnd > currentEnd
+    }
+
+    return isMoreRecentEvent(candidate, current)
+  }
 
   if (candidateHasFutureEnd && currentHasFutureEnd) {
     if (candidateResolved !== currentResolved) {
