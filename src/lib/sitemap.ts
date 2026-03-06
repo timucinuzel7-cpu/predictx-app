@@ -7,6 +7,7 @@ import { event_sports, event_tags, events, markets, tags } from '@/lib/db/schema
 import { db } from '@/lib/drizzle'
 import { resolveEventMarketPath, resolveEventPagePath } from '@/lib/events-routing'
 import { isDynamicHomeCategorySlug } from '@/lib/platform-routing'
+import { isSportsAuxiliaryEventSlug } from '@/lib/sports-event-slugs'
 
 const STATIC_SITEMAP_IDS = [
   'base',
@@ -53,6 +54,10 @@ interface PredictionSitemapRow {
   updated_at: Date
   sports_sport_slug: string | null
   sports_event_slug: string | null
+}
+
+function shouldIgnoreSportsSitemapSlug(slug: string | null | undefined) {
+  return isSportsAuxiliaryEventSlug(slug)
 }
 
 export function formatDateForSitemap(date: Date): string {
@@ -204,6 +209,11 @@ async function getPredictionSitemapEntries(): Promise<SitemapRouteEntry[]> {
 
     const marketPathMap = new Map<string, SitemapRouteEntry>()
     for (const row of rows as PredictionSitemapRow[]) {
+      const sportsEventSlug = row.sports_event_slug?.trim() || row.event_slug
+      if (shouldIgnoreSportsSitemapSlug(sportsEventSlug)) {
+        continue
+      }
+
       const marketPath = resolveEventMarketPath({
         slug: row.event_slug,
         sports_sport_slug: row.sports_sport_slug,
@@ -283,6 +293,11 @@ function groupEventRowsBySitemap(rows: EventSitemapRow[]): DynamicEventSitemaps 
   const closedByMonthMap = new Map<string, Map<string, SitemapRouteEntry>>()
 
   for (const row of rows) {
+    const sportsEventSlug = row.sports_event_slug?.trim() || row.slug
+    if (shouldIgnoreSportsSitemapSlug(sportsEventSlug)) {
+      continue
+    }
+
     const eventPath = resolveEventPagePath({
       slug: row.slug,
       sports_sport_slug: row.sports_sport_slug,
