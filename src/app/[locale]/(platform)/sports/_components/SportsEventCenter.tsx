@@ -386,7 +386,46 @@ function SportsEventShareButton({ event }: { event: SportsGamesCard['event'] }) 
   )
 }
 
-function SportsEventLiveStatusIcon({ className }: { className?: string }) {
+function normalizeLivestreamUrl(value: string | null | undefined) {
+  const trimmed = value?.trim()
+  if (!trimmed) {
+    return null
+  }
+
+  try {
+    const parsed = new URL(trimmed)
+    if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+      return null
+    }
+    return parsed.toString()
+  }
+  catch {
+    return null
+  }
+}
+
+function SportsEventLiveStatusIcon({ className, muted = false }: { className?: string, muted?: boolean }) {
+  if (muted) {
+    return (
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="18"
+        height="18"
+        viewBox="0 0 18 18"
+        className={cn(className, 'text-muted-foreground')}
+        fill="none"
+      >
+        <g stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5">
+          <path d="M5.641,12.359c-1.855-1.855-1.855-4.863,0-6.718" />
+          <path d="M3.52,14.48C.493,11.454,.493,6.546,3.52,3.52" />
+          <circle cx="9" cy="9" r="1.75" fill="none" stroke="currentColor" />
+          <path d="M12.359,12.359c1.855-1.855,1.855-4.863,0-6.718" />
+          <path d="M14.48,14.48c3.027-3.027,3.027-7.934,0-10.96" />
+        </g>
+      </svg>
+    )
+  }
+
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -610,6 +649,7 @@ export default function SportsEventCenter({
   const setOrderSide = useOrder(state => state.setSide)
   const setIsMobileOrderPanelOpen = useOrder(state => state.setIsMobileOrderPanelOpen)
   const openLivestream = useSportsLivestream(state => state.openStream)
+  const activeStreamUrl = useSportsLivestream(state => state.streamUrl)
   const orderMarketConditionId = useOrder(state => state.market?.condition_id ?? null)
   const orderOutcomeIndex = useOrder(state => state.outcome?.outcome_index ?? null)
   const user = useUser()
@@ -1200,6 +1240,12 @@ export default function SportsEventCenter({
     : card.title
   const hasLivestreamUrl = Boolean(card.event.livestream_url?.trim())
   const canWatchLivestream = hasLivestreamUrl && card.event.sports_ended !== true && card.event.sports_live !== false
+  const normalizedEventLivestreamUrl = useMemo(
+    () => normalizeLivestreamUrl(card.event.livestream_url),
+    [card.event.livestream_url],
+  )
+  const isCurrentEventLivestreamOpen = normalizedEventLivestreamUrl !== null
+    && normalizedEventLivestreamUrl === activeStreamUrl
   const showFinalScore = card.event.sports_ended === true
   const parsedFinalScore = parseSportsScore(card.event.sports_score)
   const team1Score = parsedFinalScore?.team1
@@ -1331,7 +1377,10 @@ export default function SportsEventCenter({
                   hover:bg-secondary/50 hover:text-foreground
                 `}
               >
-                <SportsEventLiveStatusIcon className="size-3.5" />
+                <SportsEventLiveStatusIcon
+                  className="size-3.5"
+                  muted={isCurrentEventLivestreamOpen}
+                />
                 <span>Watch Stream</span>
               </button>
             </div>
