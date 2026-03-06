@@ -1,9 +1,14 @@
 'use client'
 
-import type { SportsGamesButton, SportsGamesCard } from '@/app/[locale]/(platform)/sports/_components/sports-games-data'
+import type {
+  SportsGamesButton,
+  SportsGamesCard,
+  SportsGamesCardMarketView,
+} from '@/app/[locale]/(platform)/sports/_components/sports-games-data'
 import type { SportsGamesMarketType } from '@/app/[locale]/(platform)/sports/_components/SportsGamesCenter'
 import type { SportsRedeemModalGroup, SportsRedeemModalSection } from '@/app/[locale]/(platform)/sports/_components/SportsRedeemModal'
 import type { OddsFormat } from '@/lib/odds-format'
+import type { SportsEventMarketViewKey } from '@/lib/sports-event-slugs'
 import type { UserPosition } from '@/types'
 import { useQuery } from '@tanstack/react-query'
 import { CheckIcon, ChevronLeftIcon, ShareIcon } from 'lucide-react'
@@ -35,6 +40,7 @@ import SportsLivestreamFloatingPlayer
 import SportsRedeemModal from '@/app/[locale]/(platform)/sports/_components/SportsRedeemModal'
 import SiteLogoIcon from '@/components/SiteLogoIcon'
 import { Button } from '@/components/ui/button'
+import { useCurrentTimestamp } from '@/hooks/useCurrentTimestamp'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { useSiteIdentity } from '@/hooks/useSiteIdentity'
 import { Link } from '@/i18n/navigation'
@@ -53,10 +59,12 @@ type EventSectionKey = Extract<SportsGamesMarketType, 'moneyline' | 'spread' | '
 
 interface SportsEventCenterProps {
   card: SportsGamesCard
+  marketViewCards?: SportsGamesCardMarketView[]
   relatedCards?: SportsGamesCard[]
   sportSlug: string
   sportLabel: string
   initialMarketSlug?: string | null
+  initialMarketViewKey?: SportsEventMarketViewKey | null
 }
 
 const SECTION_ORDER: Array<{ key: EventSectionKey, label: string }> = [
@@ -508,6 +516,25 @@ function sortSectionButtons(sectionKey: EventSectionKey, buttons: SportsGamesBut
   return buttons
 }
 
+function resolveMarketViewCardBySlug(
+  marketViewCards: SportsGamesCardMarketView[],
+  marketSlug: string | null,
+) {
+  if (!marketSlug) {
+    return null
+  }
+
+  return marketViewCards.find(view =>
+    view.card.detailMarkets.some(market => market.slug === marketSlug),
+  ) ?? null
+}
+
+function resolveAuxiliaryMarketTitle(market: SportsGamesCard['detailMarkets'][number]) {
+  return market.sports_group_item_title?.trim()
+    || market.short_title?.trim()
+    || market.title
+}
+
 function SportsEventRelatedGames({
   cards,
   sportSlug,
@@ -635,10 +662,12 @@ function SportsEventRelatedGames({
 
 export default function SportsEventCenter({
   card,
+  marketViewCards = [],
   relatedCards = [],
   sportSlug,
   sportLabel,
   initialMarketSlug = null,
+  initialMarketViewKey = null,
 }: SportsEventCenterProps) {
   const locale = useLocale()
   const site = useSiteIdentity()
@@ -658,6 +687,36 @@ export default function SportsEventCenter({
   const [claimedConditionIds, setClaimedConditionIds] = useState<Record<string, true>>({})
   const [redeemSectionKey, setRedeemSectionKey] = useState<EventSectionKey | null>(null)
   const [redeemDefaultConditionId, setRedeemDefaultConditionId] = useState<string | null>(null)
+  const normalizedMarketViewCards = useMemo(
+    () => marketViewCards.length > 0
+      ? marketViewCards
+      : [{ key: 'gameLines' as const, label: 'Game Lines', card }],
+    [card, marketViewCards],
+  )
+  const initialMarketViewFromSlug = useMemo(
+    () => resolveMarketViewCardBySlug(normalizedMarketViewCards, initialMarketSlug)?.key ?? null,
+    [initialMarketSlug, normalizedMarketViewCards],
+  )
+  const resolvedInitialMarketViewKey = useMemo(() => {
+    if (
+      initialMarketViewFromSlug
+      && normalizedMarketViewCards.some(view => view.key === initialMarketViewFromSlug)
+    ) {
+      return initialMarketViewFromSlug
+    }
+
+    if (
+      initialMarketViewKey
+      && normalizedMarketViewCards.some(view => view.key === initialMarketViewKey)
+    ) {
+      return initialMarketViewKey
+    }
+
+    return normalizedMarketViewCards.find(view => view.key === 'gameLines')?.key
+      ?? normalizedMarketViewCards[0]?.key
+      ?? 'gameLines'
+  }, [initialMarketViewFromSlug, initialMarketViewKey, normalizedMarketViewCards])
+  const [activeMarketViewKey, setActiveMarketViewKey] = useState<SportsEventMarketViewKey>(resolvedInitialMarketViewKey)
 
   const ownerAddress = useMemo(() => {
     if (user?.proxy_wallet_address && user.proxy_wallet_status === 'deployed') {
@@ -666,8 +725,27 @@ export default function SportsEventCenter({
     return null
   }, [user?.proxy_wallet_address, user?.proxy_wallet_status])
 
+  useEffect(() => {
+    setActiveMarketViewKey(resolvedInitialMarketViewKey)
+  }, [resolvedInitialMarketViewKey])
+
+  const activeMarketView = useMemo(
+    () => normalizedMarketViewCards.find(view => view.key === activeMarketViewKey)
+      ?? normalizedMarketViewCards.find(view => view.key === resolvedInitialMarketViewKey)
+      ?? normalizedMarketViewCards[0]
+      ?? null,
+    [activeMarketViewKey, normalizedMarketViewCards, resolvedInitialMarketViewKey],
+  )
+  const heroCard = card
+  const activeCard = activeMarketView?.card ?? card
+  const hasMultipleMarketViews = normalizedMarketViewCards.length > 1
+  const isGameLinesView = (activeMarketView?.key ?? 'gameLines') === 'gameLines'
+  const isHalftimeResultView = activeMarketView?.key === 'halftimeResult'
+  const usesSectionLayout = isGameLinesView || isHalftimeResultView
+  const heroGroupedButtons = useMemo(() => groupButtonsByMarketType(heroCard.buttons), [heroCard.buttons])
+
   const { data: userPositions } = useQuery<UserPosition[]>({
-    queryKey: ['sports-event-user-positions', ownerAddress, card.id],
+    queryKey: ['sports-event-user-positions', ownerAddress, activeCard.id],
     enabled: Boolean(ownerAddress),
     staleTime: 1000 * 30,
     gcTime: 1000 * 60 * 10,
@@ -685,7 +763,7 @@ export default function SportsEventCenter({
     setClaimedConditionIds({})
     setRedeemSectionKey(null)
     setRedeemDefaultConditionId(null)
-  }, [card.id])
+  }, [activeCard.id])
 
   useEffect(() => {
     if (typeof window === 'undefined') {
@@ -714,27 +792,27 @@ export default function SportsEventCenter({
     return formatOddsFromCents(cents, oddsFormat)
   }, [oddsFormat])
 
-  const groupedButtons = useMemo(() => groupButtonsByMarketType(card.buttons), [card.buttons])
+  const groupedButtons = useMemo(() => groupButtonsByMarketType(activeCard.buttons), [activeCard.buttons])
   const detailMarketByConditionId = useMemo(
-    () => new Map(card.detailMarkets.map(market => [market.condition_id, market] as const)),
-    [card.detailMarkets],
+    () => new Map(activeCard.detailMarkets.map(market => [market.condition_id, market] as const)),
+    [activeCard.detailMarkets],
   )
   const buttonByConditionAndOutcome = useMemo(() => {
     const map = new Map<string, SportsGamesButton>()
-    card.buttons.forEach((button) => {
+    activeCard.buttons.forEach((button) => {
       map.set(`${button.conditionId}:${button.outcomeIndex}`, button)
     })
     return map
-  }, [card.buttons])
+  }, [activeCard.buttons])
   const firstButtonByConditionId = useMemo(() => {
     const map = new Map<string, SportsGamesButton>()
-    card.buttons.forEach((button) => {
+    activeCard.buttons.forEach((button) => {
       if (!map.has(button.conditionId)) {
         map.set(button.conditionId, button)
       }
     })
     return map
-  }, [card.buttons])
+  }, [activeCard.buttons])
   const availableSections = useMemo(
     () => SECTION_ORDER.filter(section => groupedButtons[section.key].length > 0),
     [groupedButtons],
@@ -812,7 +890,7 @@ export default function SportsEventCenter({
           sectionKey,
           group: {
             conditionId,
-            title: resolveRedeemOptionLabel(card, market, firstButton),
+            title: resolveRedeemOptionLabel(activeCard, market, firstButton),
             amount: 0,
             indexSets: [],
             positions: [],
@@ -841,7 +919,7 @@ export default function SportsEventCenter({
         return Boolean(normalizedLabel) && normalizedLabel !== 'yes' && normalizedLabel !== 'no'
       })
       const preferredButtonLabel = preferredButton
-        ? resolveRedeemOptionLabel(card, market, preferredButton)
+        ? resolveRedeemOptionLabel(activeCard, market, preferredButton)
         : null
       const fallbackButtonLabel = [positionButton.label?.trim(), firstButton.label?.trim()].find((label) => {
         const normalizedLabel = label?.toLowerCase()
@@ -901,21 +979,21 @@ export default function SportsEventCenter({
     })
 
     return bySection
-  }, [buttonByConditionAndOutcome, card, claimedConditionIds, detailMarketByConditionId, firstButtonByConditionId, userPositions])
+  }, [activeCard, buttonByConditionAndOutcome, claimedConditionIds, detailMarketByConditionId, firstButtonByConditionId, userPositions])
 
   const marketSlugToButtonKey = useMemo(() => {
     if (!initialMarketSlug) {
       return null
     }
 
-    const matchedMarket = card.detailMarkets.find(market => market.slug === initialMarketSlug)
+    const matchedMarket = activeCard.detailMarkets.find(market => market.slug === initialMarketSlug)
     if (!matchedMarket) {
       return null
     }
 
-    const matchedButton = card.buttons.find(button => button.conditionId === matchedMarket.condition_id)
+    const matchedButton = activeCard.buttons.find(button => button.conditionId === matchedMarket.condition_id)
     return matchedButton?.key ?? null
-  }, [card.buttons, card.detailMarkets, initialMarketSlug])
+  }, [activeCard.buttons, activeCard.detailMarkets, initialMarketSlug])
 
   const [selectedButtonBySection, setSelectedButtonBySection] = useState<Record<EventSectionKey, string | null>>({
     moneyline: null,
@@ -923,19 +1001,124 @@ export default function SportsEventCenter({
     total: null,
     btts: null,
   })
+  const [selectedAuxiliaryButtonByConditionId, setSelectedAuxiliaryButtonByConditionId] = useState<
+    Record<string, string | null>
+  >({})
   const [activeTradeButtonKey, setActiveTradeButtonKey] = useState<string | null>(null)
   const [openSectionKey, setOpenSectionKey] = useState<EventSectionKey | null>(null)
+  const [openAuxiliaryConditionId, setOpenAuxiliaryConditionId] = useState<string | null>(null)
   const [tabBySection, setTabBySection] = useState<Record<EventSectionKey, DetailsTab>>({
     moneyline: 'orderBook',
     spread: 'orderBook',
     total: 'orderBook',
     btts: 'orderBook',
   })
+  const [tabByAuxiliaryConditionId, setTabByAuxiliaryConditionId] = useState<Record<string, DetailsTab>>({})
   const previousCardIdRef = useRef<string | null>(null)
+  const auxiliaryMarketCards = useMemo(() => {
+    const buttonsByConditionId = new Map<string, SportsGamesButton[]>()
+
+    activeCard.buttons.forEach((button) => {
+      const currentButtons = buttonsByConditionId.get(button.conditionId) ?? []
+      currentButtons.push(button)
+      buttonsByConditionId.set(button.conditionId, currentButtons)
+    })
+
+    return activeCard.detailMarkets
+      .map((market) => {
+        const buttons = sortSectionButtons(
+          'moneyline',
+          buttonsByConditionId.get(market.condition_id) ?? [],
+        )
+
+        if (buttons.length === 0) {
+          return null
+        }
+
+        return { market, buttons }
+      })
+      .filter((entry): entry is { market: SportsGamesCard['detailMarkets'][number], buttons: SportsGamesButton[] } => Boolean(entry))
+  }, [activeCard.buttons, activeCard.detailMarkets])
 
   useEffect(() => {
-    const isNewCard = previousCardIdRef.current !== card.id
-    previousCardIdRef.current = card.id
+    const isNewCard = previousCardIdRef.current !== activeCard.id
+    previousCardIdRef.current = activeCard.id
+
+    if (!usesSectionLayout) {
+      const defaultSelectedByCondition = auxiliaryMarketCards.reduce<Record<string, string | null>>((acc, entry) => {
+        const marketMatchedButton = marketSlugToButtonKey
+          && entry.buttons.some(button => button.key === marketSlugToButtonKey)
+          ? marketSlugToButtonKey
+          : null
+
+        acc[entry.market.condition_id] = marketMatchedButton ?? entry.buttons[0]?.key ?? null
+        return acc
+      }, {})
+
+      setSelectedAuxiliaryButtonByConditionId((current) => {
+        if (isNewCard) {
+          return defaultSelectedByCondition
+        }
+
+        const next = { ...defaultSelectedByCondition }
+        Object.entries(current).forEach(([conditionId, buttonKey]) => {
+          if (!buttonKey) {
+            return
+          }
+
+          const matchedEntry = auxiliaryMarketCards.find(entry => entry.market.condition_id === conditionId)
+          if (!matchedEntry) {
+            return
+          }
+
+          if (matchedEntry.buttons.some(button => button.key === buttonKey)) {
+            next[conditionId] = buttonKey
+          }
+        })
+
+        return next
+      })
+
+      setTabByAuxiliaryConditionId((current) => {
+        const next = { ...current }
+        auxiliaryMarketCards.forEach(({ market }) => {
+          if (!next[market.condition_id]) {
+            next[market.condition_id] = 'orderBook'
+          }
+        })
+        return next
+      })
+
+      const defaultTradeButton = marketSlugToButtonKey
+        ?? auxiliaryMarketCards[0]?.buttons[0]?.key
+        ?? resolveDefaultConditionId(activeCard)
+
+      setActiveTradeButtonKey((current) => {
+        if (marketSlugToButtonKey && activeCard.buttons.some(button => button.key === marketSlugToButtonKey)) {
+          return marketSlugToButtonKey
+        }
+
+        if (!isNewCard && current && activeCard.buttons.some(button => button.key === current)) {
+          return current
+        }
+
+        return defaultTradeButton
+      })
+
+      setOpenSectionKey(null)
+      setOpenAuxiliaryConditionId((current) => {
+        if (isNewCard) {
+          return null
+        }
+
+        if (current && auxiliaryMarketCards.some(entry => entry.market.condition_id === current)) {
+          return current
+        }
+
+        return null
+      })
+      return
+    }
 
     const defaultSelectedBySection: Record<EventSectionKey, string | null> = {
       moneyline: null,
@@ -950,7 +1133,7 @@ export default function SportsEventCenter({
     }
 
     if (marketSlugToButtonKey) {
-      const marketButton = card.buttons.find(button => button.key === marketSlugToButtonKey)
+      const marketButton = activeCard.buttons.find(button => button.key === marketSlugToButtonKey)
       if (marketButton) {
         defaultSelectedBySection[marketButton.marketType as EventSectionKey] = marketButton.key
       }
@@ -985,18 +1168,18 @@ export default function SportsEventCenter({
       ?? defaultSelectedBySection.spread
       ?? defaultSelectedBySection.total
       ?? defaultSelectedBySection.btts
-      ?? resolveDefaultConditionId(card)
+      ?? resolveDefaultConditionId(activeCard)
 
     setActiveTradeButtonKey((current) => {
       if (marketSlugToButtonKey) {
-        const matchesMarketSlug = card.buttons.some(button => button.key === marketSlugToButtonKey)
+        const matchesMarketSlug = activeCard.buttons.some(button => button.key === marketSlugToButtonKey)
         if (matchesMarketSlug) {
           return marketSlugToButtonKey
         }
       }
 
       if (!isNewCard && current) {
-        const stillExists = card.buttons.some(button => button.key === current)
+        const stillExists = activeCard.buttons.some(button => button.key === current)
         if (stillExists) {
           return current
         }
@@ -1014,7 +1197,16 @@ export default function SportsEventCenter({
       }
       return null
     })
-  }, [card, card.id, card.buttons, groupedButtons, marketSlugToButtonKey])
+    setOpenAuxiliaryConditionId(null)
+  }, [
+    activeCard,
+    activeCard.id,
+    activeCard.buttons,
+    auxiliaryMarketCards,
+    groupedButtons,
+    usesSectionLayout,
+    marketSlugToButtonKey,
+  ])
 
   const moneylineButtonKey = selectedButtonBySection.moneyline ?? groupedButtons.moneyline[0]?.key ?? null
   const fallbackButtonFromOrderState = useMemo(() => {
@@ -1023,7 +1215,7 @@ export default function SportsEventCenter({
     }
 
     if (orderOutcomeIndex === OUTCOME_INDEX.YES || orderOutcomeIndex === OUTCOME_INDEX.NO) {
-      const exactButton = card.buttons.find(button =>
+      const exactButton = activeCard.buttons.find(button =>
         button.conditionId === orderMarketConditionId && button.outcomeIndex === orderOutcomeIndex,
       )
       if (exactButton) {
@@ -1031,38 +1223,47 @@ export default function SportsEventCenter({
       }
     }
 
-    const conditionButton = card.buttons.find(button => button.conditionId === orderMarketConditionId)
+    const conditionButton = activeCard.buttons.find(button => button.conditionId === orderMarketConditionId)
     return conditionButton?.key ?? null
-  }, [card.buttons, orderMarketConditionId, orderOutcomeIndex])
+  }, [activeCard.buttons, orderMarketConditionId, orderOutcomeIndex])
 
   const activeTradeContext = useMemo(() => {
-    const candidateKeys = [
-      activeTradeButtonKey,
-      fallbackButtonFromOrderState,
-      openSectionKey ? selectedButtonBySection[openSectionKey] : null,
-      moneylineButtonKey,
-      selectedButtonBySection.spread,
-      selectedButtonBySection.total,
-      selectedButtonBySection.btts,
-      resolveDefaultConditionId(card),
-    ]
+    const candidateKeys = usesSectionLayout
+      ? [
+          activeTradeButtonKey,
+          fallbackButtonFromOrderState,
+          openSectionKey ? selectedButtonBySection[openSectionKey] : null,
+          moneylineButtonKey,
+          selectedButtonBySection.spread,
+          selectedButtonBySection.total,
+          selectedButtonBySection.btts,
+          resolveDefaultConditionId(activeCard),
+        ]
+      : [
+          activeTradeButtonKey,
+          fallbackButtonFromOrderState,
+          openAuxiliaryConditionId ? selectedAuxiliaryButtonByConditionId[openAuxiliaryConditionId] : null,
+          marketSlugToButtonKey,
+          auxiliaryMarketCards[0]?.buttons[0]?.key ?? null,
+          resolveDefaultConditionId(activeCard),
+        ]
     const effectiveButtonKey = candidateKeys.find((buttonKey) => {
       if (!buttonKey) {
         return false
       }
 
-      return card.buttons.some(button => button.key === buttonKey)
+      return activeCard.buttons.some(button => button.key === buttonKey)
     }) ?? null
     if (!effectiveButtonKey) {
       return null
     }
 
-    const button = resolveSelectedButton(card, effectiveButtonKey)
+    const button = resolveSelectedButton(activeCard, effectiveButtonKey)
     if (!button) {
       return null
     }
 
-    const market = resolveSelectedMarket(card, button.key)
+    const market = resolveSelectedMarket(activeCard, button.key)
     if (!market) {
       return null
     }
@@ -1075,10 +1276,15 @@ export default function SportsEventCenter({
     return { button, market, outcome }
   }, [
     activeTradeButtonKey,
-    card,
+    activeCard,
+    auxiliaryMarketCards,
     fallbackButtonFromOrderState,
+    usesSectionLayout,
     moneylineButtonKey,
+    marketSlugToButtonKey,
+    openAuxiliaryConditionId,
     openSectionKey,
+    selectedAuxiliaryButtonByConditionId,
     selectedButtonBySection,
   ])
 
@@ -1099,7 +1305,7 @@ export default function SportsEventCenter({
       outcome => outcome.outcome_index === orderOutcomeIndex,
     ) ?? activeTradeContext.outcome
 
-    const matchedButton = card.buttons.find(
+    const matchedButton = activeCard.buttons.find(
       button => (
         button.conditionId === activeTradeContext.market.condition_id
         && button.outcomeIndex === orderOutcomeIndex
@@ -1111,29 +1317,29 @@ export default function SportsEventCenter({
       button: matchedButton,
       outcome: matchedOutcome,
     }
-  }, [activeTradeContext, card.buttons, orderMarketConditionId, orderOutcomeIndex])
+  }, [activeTradeContext, activeCard.buttons, orderMarketConditionId, orderOutcomeIndex])
 
   const activeTradePrimaryOutcomeIndex = useMemo(() => {
     if (!activeTradeContext || activeTradeContext.button.marketType !== 'spread') {
       return null
     }
 
-    return resolveStableSpreadPrimaryOutcomeIndex(card, activeTradeContext.button.conditionId)
-  }, [activeTradeContext, card])
+    return resolveStableSpreadPrimaryOutcomeIndex(activeCard, activeTradeContext.button.conditionId)
+  }, [activeCard, activeTradeContext])
 
   useEffect(() => {
     if (!activeTradeContext) {
       return
     }
 
-    setOrderEvent(card.event)
+    setOrderEvent(activeCard.event)
     setOrderMarket(activeTradeContext.market)
     setOrderOutcome(activeTradeContext.outcome)
     setOrderSide(ORDER_SIDE.BUY)
-  }, [activeTradeContext, card.event, setOrderEvent, setOrderMarket, setOrderOutcome, setOrderSide])
+  }, [activeCard.event, activeTradeContext, setOrderEvent, setOrderMarket, setOrderOutcome, setOrderSide])
 
   const sectionVolumes = useMemo(() => {
-    const byConditionId = new Map(card.detailMarkets.map(market => [market.condition_id, market] as const))
+    const byConditionId = new Map(activeCard.detailMarkets.map(market => [market.condition_id, market] as const))
     const volumes: Record<EventSectionKey, number> = {
       moneyline: 0,
       spread: 0,
@@ -1150,7 +1356,7 @@ export default function SportsEventCenter({
     }
 
     return volumes
-  }, [card.detailMarkets, groupedButtons])
+  }, [activeCard.detailMarkets, groupedButtons])
 
   const sectionConditionIdsByKey = useMemo<Record<EventSectionKey, Set<string>>>(() => {
     return {
@@ -1221,7 +1427,44 @@ export default function SportsEventCenter({
     }
   }
 
-  const startDate = card.startTime ? new Date(card.startTime) : null
+  function updateAuxiliarySelection(
+    conditionId: string,
+    buttonKey: string,
+    options?: { panelMode?: 'full' | 'partial' | 'preserve' },
+  ) {
+    setSelectedAuxiliaryButtonByConditionId((current) => {
+      if (current[conditionId] === buttonKey) {
+        return current
+      }
+
+      return {
+        ...current,
+        [conditionId]: buttonKey,
+      }
+    })
+
+    setActiveTradeButtonKey(buttonKey)
+
+    const panelMode = options?.panelMode ?? 'full'
+    const shouldOpenMobileSheetOnly = isMobile && panelMode === 'full'
+
+    if (shouldOpenMobileSheetOnly) {
+      setIsMobileOrderPanelOpen(true)
+    }
+
+    if (panelMode === 'full' && !shouldOpenMobileSheetOnly) {
+      setOpenAuxiliaryConditionId(conditionId)
+    }
+  }
+
+  const currentTimestamp = useCurrentTimestamp({ intervalMs: 60_000 })
+  const startDate = heroCard.startTime
+    ? new Date(heroCard.startTime)
+    : heroCard.event.sports_start_time
+      ? new Date(heroCard.event.sports_start_time)
+      : heroCard.event.start_date
+        ? new Date(heroCard.event.start_date)
+        : null
   const hasValidStartDate = Boolean(startDate && !Number.isNaN(startDate.getTime()))
   const timeLabel = hasValidStartDate
     ? new Intl.DateTimeFormat(locale, { hour: 'numeric', minute: '2-digit' }).format(startDate as Date)
@@ -1230,34 +1473,49 @@ export default function SportsEventCenter({
     ? new Intl.DateTimeFormat(locale, { month: 'long', day: 'numeric' }).format(startDate as Date)
     : 'Date TBD'
 
-  const team1 = card.teams[0] ?? null
-  const team2 = card.teams[1] ?? null
+  const team1 = heroCard.teams[0] ?? null
+  const team2 = heroCard.teams[1] ?? null
   const shortTeam1Label = resolveTeamShortLabel(team1)
   const shortTeam2Label = resolveTeamShortLabel(team2)
   const eventShortLabel = `${shortTeam1Label} vs. ${shortTeam2Label}`
   const eventTitle = team1 && team2
     ? `${team1.name} vs ${team2.name}`
-    : card.title
-  const hasLivestreamUrl = Boolean(card.event.livestream_url?.trim())
-  const canWatchLivestream = hasLivestreamUrl && card.event.sports_ended !== true && card.event.sports_live !== false
+    : heroCard.title
+  const hasLivestreamUrl = Boolean(heroCard.event.livestream_url?.trim())
+  const canWatchLivestream = (
+    hasLivestreamUrl
+    && heroCard.event.sports_ended !== true
+    && heroCard.event.sports_live !== false
+  )
   const normalizedEventLivestreamUrl = useMemo(
-    () => normalizeLivestreamUrl(card.event.livestream_url),
-    [card.event.livestream_url],
+    () => normalizeLivestreamUrl(heroCard.event.livestream_url),
+    [heroCard.event.livestream_url],
   )
   const isCurrentEventLivestreamOpen = normalizedEventLivestreamUrl !== null
     && normalizedEventLivestreamUrl === activeStreamUrl
-  const showFinalScore = card.event.sports_ended === true
-  const parsedFinalScore = parseSportsScore(card.event.sports_score)
-  const team1Score = parsedFinalScore?.team1
-  const team2Score = parsedFinalScore?.team2
+  const showFinalScore = heroCard.event.sports_ended === true
+  const hasStarted = (
+    currentTimestamp != null
+    && hasValidStartDate
+    && (startDate as Date).getTime() <= currentTimestamp
+  )
+  const showLiveScore = !showFinalScore && (heroCard.event.sports_live === true || hasStarted)
+  const parsedScore = parseSportsScore(heroCard.event.sports_score)
+  const team1Score = showLiveScore ? (parsedScore?.team1 ?? 0) : parsedScore?.team1
+  const team2Score = showLiveScore ? (parsedScore?.team2 ?? 0) : parsedScore?.team2
   const team1Won = team1Score != null && team2Score != null && team1Score > team2Score
   const team2Won = team1Score != null && team2Score != null && team2Score > team1Score
 
-  const moneylineSelectedButton = resolveSelectedButton(card, moneylineButtonKey)
-  const graphConditionId = moneylineSelectedButton?.conditionId ?? null
+  const heroMoneylineButtonKey = heroCard.buttons.some(button => button.key === moneylineButtonKey)
+    ? moneylineButtonKey
+    : heroGroupedButtons.moneyline[0]?.key
+      ?? heroCard.buttons.find(button => button.marketType === 'moneyline')?.key
+      ?? null
+  const heroMoneylineSelectedButton = resolveSelectedButton(heroCard, heroMoneylineButtonKey)
+  const graphConditionId = heroMoneylineSelectedButton?.conditionId ?? null
   const allCardConditionIds = useMemo(
-    () => new Set(card.detailMarkets.map(market => market.condition_id)),
-    [card.detailMarkets],
+    () => new Set(activeCard.detailMarkets.map(market => market.condition_id)),
+    [activeCard.detailMarkets],
   )
   const redeemSectionConfig = useMemo(
     () => (redeemSectionKey ? SECTION_ORDER.find(section => section.key === redeemSectionKey) ?? null : null),
@@ -1272,6 +1530,19 @@ export default function SportsEventCenter({
           groups: claimGroupsBySection[section.key],
         }))
         .filter(section => section.groups.length > 0),
+    [claimGroupsBySection],
+  )
+  const auxiliaryResolvedByConditionId = useMemo(
+    () => new Map(
+      auxiliaryMarketCards.map(({ market }) => [
+        market.condition_id,
+        Boolean(market.is_resolved || market.condition?.resolved),
+      ] as const),
+    ),
+    [auxiliaryMarketCards],
+  )
+  const auxiliaryClaimGroupsByConditionId = useMemo(
+    () => new Map(claimGroupsBySection.moneyline.map(group => [group.conditionId, group] as const)),
     [claimGroupsBySection],
   )
   const handleOpenRedeemForCondition = useCallback((conditionId: string) => {
@@ -1293,225 +1564,44 @@ export default function SportsEventCenter({
     setRedeemDefaultConditionId(normalizedConditionId)
     setRedeemSectionKey(matchedSection.key)
   }, [claimGroupsBySection, sectionConditionIdsByKey])
+  const marketViewTabs = hasMultipleMarketViews
+    ? (
+        <div className="mb-4 flex flex-wrap items-center gap-5 border-b border-border/70">
+          {normalizedMarketViewCards.map((view) => {
+            const isActive = view.key === activeMarketView?.key
 
-  return (
-    <>
-      <div className="
-        min-[1200px]:grid min-[1200px]:h-full min-[1200px]:grid-cols-[minmax(0,1fr)_21.25rem] min-[1200px]:gap-6
-      "
-      >
-        <section
-          data-sports-scroll-pane="center"
-          className="min-w-0 min-[1200px]:min-h-0 min-[1200px]:overflow-y-auto min-[1200px]:pr-1 lg:ml-4"
-        >
-          <div className="mb-4">
-            <div className="relative mb-1 flex min-h-9 items-center justify-center">
-              <Link
-                href={`/sports/${sportSlug}/games`}
-                aria-label="Back to games"
-                className={cn(
-                  headerIconButtonClass,
-                  'absolute left-0 inline-flex size-8 items-center justify-center p-0 text-foreground md:size-9',
-                )}
-              >
-                <ChevronLeftIcon className="size-4 text-foreground" />
-              </Link>
-
-              <div
-                className="
-                  flex min-w-0 items-center justify-center gap-1 px-14 text-center text-sm text-muted-foreground
-                  sm:px-22
-                "
-              >
-                <Link href="/sports/live" className="hover:text-foreground">
-                  Sports
-                </Link>
-                <span className="opacity-60">·</span>
-                <Link href={`/sports/${sportSlug}/games`} className="truncate hover:text-foreground">
-                  {sportLabel}
-                </Link>
-              </div>
-
-              <div className="absolute right-0 flex items-center gap-1 text-foreground">
-                <EventBookmark event={card.event} />
-                <SportsEventShareButton event={card.event} />
-              </div>
-            </div>
-
-            <h1 className="text-center text-xl font-semibold text-foreground sm:text-2xl">
-              {eventTitle}
-            </h1>
-          </div>
-
-          <div className="mb-4 flex items-center gap-3">
-            <div className="h-px flex-1 bg-border/70" />
-            <div className="pointer-events-none flex items-center gap-2 text-sm text-muted-foreground select-none">
-              <SiteLogoIcon
-                logoSvg={site.logoSvg}
-                logoImageUrl={site.logoImageUrl}
-                alt={`${site.name} logo`}
-                className="
-                  pointer-events-none size-4 text-current select-none
-                  [&_svg]:size-4
-                  [&_svg_*]:fill-current [&_svg_*]:stroke-current
-                "
-                imageClassName="pointer-events-none size-4 object-contain select-none"
-                size={16}
-              />
-              <span className="font-medium select-none">{site.name}</span>
-            </div>
-            <div className="h-px flex-1 bg-border/70" />
-          </div>
-
-          {canWatchLivestream && (
-            <div className="mb-4 flex items-center justify-center">
+            return (
               <button
+                key={view.key}
                 type="button"
-                onClick={() => openLivestream({
-                  url: card.event.livestream_url!,
-                  title: card.event.title || card.title,
-                })}
-                className={`
-                  inline-flex cursor-pointer items-center gap-1.5 rounded-md border border-border/80 bg-background px-3
-                  py-1.5 text-xs font-medium text-muted-foreground transition-colors
-                  hover:bg-secondary/50 hover:text-foreground
-                `}
-              >
-                <SportsEventLiveStatusIcon
-                  className="size-3.5"
-                  muted={isCurrentEventLivestreamOpen}
-                />
-                <span>Watch Stream</span>
-              </button>
-            </div>
-          )}
-
-          <div className="mb-4 flex items-center justify-center gap-12 md:gap-14">
-            <div className="flex w-20 flex-col items-center gap-2">
-              <div className="pointer-events-none flex size-12 items-center justify-center select-none">
-                {team1?.logoUrl
-                  ? (
-                      <Image
-                        src={team1.logoUrl}
-                        alt={`${team1.name} logo`}
-                        width={48}
-                        height={48}
-                        sizes="48px"
-                        draggable={false}
-                        className="size-full object-contain object-center select-none"
-                      />
-                    )
-                  : (
-                      <div className="text-sm font-semibold text-muted-foreground">
-                        {team1?.abbreviation ?? '—'}
-                      </div>
-                    )}
-              </div>
-              <span className="text-base font-semibold text-foreground uppercase">{team1?.abbreviation ?? '—'}</span>
-            </div>
-
-            {showFinalScore
-              ? (
-                  <div className="flex flex-col items-center">
-                    <div className="flex items-center gap-2 text-3xl leading-none font-semibold tabular-nums">
-                      <span
-                        className={team1Won
-                          ? 'text-foreground'
-                          : team2Won
-                            ? 'text-muted-foreground'
-                            : 'text-foreground'}
-                      >
-                        {team1Score ?? '—'}
-                      </span>
-                      <span className="text-muted-foreground">-</span>
-                      <span
-                        className={team2Won
-                          ? 'text-foreground'
-                          : team1Won
-                            ? 'text-muted-foreground'
-                            : 'text-foreground'}
-                      >
-                        {team2Score ?? '—'}
-                      </span>
-                    </div>
-                    <span className="mt-1 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
-                      FINAL
-                    </span>
-                  </div>
-                )
-              : (
-                  <div className="flex flex-col items-center">
-                    <span className="text-sm font-medium text-foreground">{timeLabel}</span>
-                    <span className="text-sm font-medium text-muted-foreground">{dayLabel}</span>
-                  </div>
+                onClick={() => setActiveMarketViewKey(view.key)}
+                className={cn(
+                  'border-b-2 pb-2 text-sm font-medium transition-colors',
+                  isActive
+                    ? 'border-foreground text-foreground'
+                    : 'border-transparent text-muted-foreground hover:text-foreground',
                 )}
-
-            <div className="flex w-20 flex-col items-center gap-2">
-              <div className="pointer-events-none flex size-12 items-center justify-center select-none">
-                {team2?.logoUrl
-                  ? (
-                      <Image
-                        src={team2.logoUrl}
-                        alt={`${team2.name} logo`}
-                        width={48}
-                        height={48}
-                        sizes="48px"
-                        draggable={false}
-                        className="size-full object-contain object-center select-none"
-                      />
-                    )
-                  : (
-                      <div className="text-sm font-semibold text-muted-foreground">
-                        {team2?.abbreviation ?? '—'}
-                      </div>
-                    )}
-              </div>
-              <span className="text-base font-semibold text-foreground uppercase">{team2?.abbreviation ?? '—'}</span>
-            </div>
-          </div>
-
-          <div className="mb-4">
-            <div className="mb-2 flex items-center justify-between px-1">
-              <span className="text-sm font-semibold text-muted-foreground">
-                {formatVolume(card.volume)}
-                {' '}
-                Vol.
-              </span>
-              <div className="pointer-events-none flex items-center gap-2 text-muted-foreground select-none">
-                <SiteLogoIcon
-                  logoSvg={site.logoSvg}
-                  logoImageUrl={site.logoImageUrl}
-                  alt={`${site.name} logo`}
-                  className="
-                    pointer-events-none size-4 text-current select-none
-                    [&_svg]:size-4
-                    [&_svg_*]:fill-current [&_svg_*]:stroke-current
-                  "
-                  imageClassName="pointer-events-none size-4 object-contain select-none"
-                  size={16}
-                />
-                <span className="text-base font-semibold select-none">{site.name}</span>
-              </div>
-            </div>
-            <SportsGameGraph
-              card={card}
-              selectedMarketType="moneyline"
-              selectedConditionId={graphConditionId}
-              defaultTimeRange="ALL"
-              variant="sportsEventHero"
-            />
-          </div>
-
+              >
+                {view.label}
+              </button>
+            )
+          })}
+        </div>
+      )
+    : null
+  const marketPanelsContent = usesSectionLayout
+    ? (
+        <div key={activeMarketView?.key ?? 'gameLines'}>
           <div className="mb-4 overflow-hidden rounded-xl border bg-card px-2.5">
             <SportsGameDetailsPanel
-              card={card}
+              card={activeCard}
               activeDetailsTab="orderBook"
               selectedButtonKey={moneylineButtonKey}
               showBottomContent={false}
               defaultGraphTimeRange="ALL"
               allowedConditionIds={allCardConditionIds}
               positionsTitle="All Positions"
-              showRedeemInPositions={card.event.sports_ended === true}
+              showRedeemInPositions={activeCard.event.sports_ended === true}
               onOpenRedeemForCondition={handleOpenRedeemForCondition}
               oddsFormat={oddsFormat}
               onChangeTab={() => {}}
@@ -1532,7 +1622,7 @@ export default function SportsEventCenter({
               const isSectionOpen = openSectionKey === section.key
               const sectionConditionIds = sectionConditionIdsByKey[section.key]
               const activeTab = tabBySection[section.key] ?? 'orderBook'
-              const selectedSectionButton = resolveSelectedButton(card, selectedButtonKey)
+              const selectedSectionButton = resolveSelectedButton(activeCard, selectedButtonKey)
               const isSectionResolved = sectionResolvedByKey[section.key]
               const sectionClaimGroups = claimGroupsBySection[section.key]
               const shouldShowRedeemButton = isSectionResolved && sectionClaimGroups.length > 0
@@ -1542,6 +1632,7 @@ export default function SportsEventCenter({
                 && (selectedSectionButton?.marketType === 'spread' || selectedSectionButton?.marketType === 'total')
               )
               const firstSectionButtonKey = sectionButtons[0]?.key ?? null
+
               function toggleSection() {
                 setOpenSectionKey(current => current === section.key ? null : section.key)
               }
@@ -1574,7 +1665,7 @@ export default function SportsEventCenter({
 
               return (
                 <article
-                  key={`${card.id}-${section.key}`}
+                  key={`${activeCard.id}-${section.key}`}
                   className="overflow-hidden rounded-xl border bg-card"
                 >
                   <div
@@ -1590,12 +1681,12 @@ export default function SportsEventCenter({
                     onClick={handleCardClick}
                     onKeyDown={handleCardKeyDown}
                   >
-                    <div
-                      className={cn(
-                        'min-w-0 text-left transition-colors hover:text-foreground/90',
-                      )}
-                    >
-                      <h3 className="text-sm font-semibold text-foreground">{section.label}</h3>
+                    <div className="min-w-0 text-left transition-colors hover:text-foreground/90">
+                      <h3 className="text-sm font-semibold text-foreground">
+                        {isHalftimeResultView && section.key === 'moneyline'
+                          ? 'Halftime Result'
+                          : section.label}
+                      </h3>
                       <p className="mt-0.5 text-xs font-semibold text-muted-foreground">
                         {formatVolume(sectionVolumes[section.key])}
                         {' '}
@@ -1606,10 +1697,11 @@ export default function SportsEventCenter({
                     {!isSectionResolved && (
                       <div
                         className={cn(
-                          'grid min-w-0 flex-1 items-stretch gap-2',
-                          'min-[1200px]:ml-auto min-[1200px]:w-[372px] min-[1200px]:flex-none',
-                          sectionButtons.length >= 3 ? 'grid-cols-3' : 'grid-cols-2',
-                          'min-[1200px]:grid-cols-3',
+                          'grid w-full min-w-0 items-stretch gap-2',
+                          'sm:ml-auto sm:flex-none',
+                          section.key === 'moneyline'
+                            ? 'grid-cols-3 sm:w-[372px] sm:grid-cols-3'
+                            : 'grid-cols-2 sm:w-[248px] sm:grid-cols-2',
                         )}
                       >
                         {sectionButtons.map((button) => {
@@ -1623,9 +1715,7 @@ export default function SportsEventCenter({
                           return (
                             <div
                               key={`${section.key}-${button.key}`}
-                              className={cn(
-                                'relative min-w-0 overflow-hidden rounded-lg pb-1.25',
-                              )}
+                              className="relative min-w-0 overflow-hidden rounded-lg pb-1.25"
                             >
                               <div
                                 className={cn(
@@ -1733,14 +1823,14 @@ export default function SportsEventCenter({
                     )}
                   >
                     <SportsGameDetailsPanel
-                      card={card}
+                      card={activeCard}
                       activeDetailsTab={activeTab}
                       selectedButtonKey={selectedButtonKey}
                       showBottomContent={isSectionOpen}
                       defaultGraphTimeRange="ALL"
                       allowedConditionIds={sectionConditionIds}
                       showAboutTab
-                      aboutEvent={card.event}
+                      aboutEvent={activeCard.event}
                       oddsFormat={oddsFormat}
                       onChangeTab={tab => setTabBySection(current => ({ ...current, [section.key]: tab }))}
                       onSelectButton={(buttonKey, options) => {
@@ -1752,9 +1842,413 @@ export default function SportsEventCenter({
               )
             })}
           </div>
+        </div>
+      )
+    : (
+        <div key={activeMarketView?.key ?? 'gameLines'} className="space-y-4">
+          {auxiliaryMarketCards.map(({ market, buttons }) => {
+            const conditionId = market.condition_id
+            const selectedButtonKey = selectedAuxiliaryButtonByConditionId[conditionId] ?? buttons[0]?.key ?? null
+            const isOpen = openAuxiliaryConditionId === conditionId
+            const activeTab = tabByAuxiliaryConditionId[conditionId] ?? 'orderBook'
+            const isResolved = auxiliaryResolvedByConditionId.get(conditionId) === true
+            const claimGroup = auxiliaryClaimGroupsByConditionId.get(conditionId) ?? null
+            const shouldShowRedeemButton = isResolved && Boolean(claimGroup)
+            const marketTitle = resolveAuxiliaryMarketTitle(market)
+            const firstButtonKey = buttons[0]?.key ?? null
+
+            function toggleCondition() {
+              setOpenAuxiliaryConditionId(current => current === conditionId ? null : conditionId)
+            }
+
+            function handleCardClick(event: React.MouseEvent<HTMLElement>) {
+              const target = event.target as HTMLElement
+              if (target.closest('[data-sports-card-control="true"]')) {
+                return
+              }
+              if (firstButtonKey) {
+                updateAuxiliarySelection(conditionId, firstButtonKey, { panelMode: 'preserve' })
+              }
+              toggleCondition()
+            }
+
+            function handleCardKeyDown(event: React.KeyboardEvent<HTMLElement>) {
+              if (event.key !== 'Enter' && event.key !== ' ') {
+                return
+              }
+              const target = event.target as HTMLElement
+              if (target.closest('[data-sports-card-control="true"]')) {
+                return
+              }
+              event.preventDefault()
+              if (firstButtonKey) {
+                updateAuxiliarySelection(conditionId, firstButtonKey, { panelMode: 'preserve' })
+              }
+              toggleCondition()
+            }
+
+            return (
+              <article
+                key={`${activeCard.id}-${conditionId}`}
+                className="overflow-hidden rounded-xl border bg-card"
+              >
+                <div
+                  className={cn(
+                    `
+                      flex w-full cursor-pointer flex-col items-stretch gap-3 px-4 py-[18px] transition-colors
+                      sm:flex-row sm:items-center
+                    `,
+                    'hover:bg-secondary/30',
+                  )}
+                  role="button"
+                  tabIndex={0}
+                  onClick={handleCardClick}
+                  onKeyDown={handleCardKeyDown}
+                >
+                  <div className="min-w-0 text-left transition-colors hover:text-foreground/90">
+                    <h3 className="text-sm font-semibold text-foreground">{marketTitle}</h3>
+                    <p className="mt-0.5 text-xs font-semibold text-muted-foreground">
+                      {formatVolume(Number(market.volume ?? 0))}
+                      {' '}
+                      Vol.
+                    </p>
+                  </div>
+
+                  {!isResolved && (
+                    <div
+                      className={cn(
+                        'grid min-w-0 flex-1 items-stretch gap-2',
+                        'min-[1200px]:ml-auto min-[1200px]:w-[248px] min-[1200px]:flex-none',
+                        'grid-cols-2',
+                      )}
+                    >
+                      {buttons.map((button) => {
+                        const isActive = activeTradeButtonKey === button.key
+                        const isOverButton = isActive && button.tone === 'over'
+                        const isUnderButton = isActive && button.tone === 'under'
+
+                        return (
+                          <div
+                            key={`${conditionId}-${button.key}`}
+                            className="relative min-w-0 overflow-hidden rounded-lg pb-1.25"
+                          >
+                            <div
+                              className={cn(
+                                'pointer-events-none absolute inset-x-0 bottom-0 h-4 rounded-b-lg',
+                                !isOverButton && !isUnderButton && 'bg-border/70',
+                                isOverButton && 'bg-yes/70',
+                                isUnderButton && 'bg-no/70',
+                              )}
+                            />
+                            <button
+                              type="button"
+                              data-sports-card-control="true"
+                              onClick={(event) => {
+                                event.stopPropagation()
+                                updateAuxiliarySelection(conditionId, button.key, { panelMode: 'full' })
+                              }}
+                              className={cn(
+                                `
+                                  relative flex h-9 w-full translate-y-0 items-center justify-between rounded-lg px-3
+                                  text-xs font-semibold shadow-sm transition-transform duration-150 ease-out
+                                  hover:translate-y-px
+                                  active:translate-y-0.5
+                                `,
+                                !isOverButton && !isUnderButton
+                                && 'bg-secondary text-secondary-foreground hover:bg-accent',
+                                isOverButton && 'bg-yes text-white hover:bg-yes-foreground',
+                                isUnderButton && 'bg-no text-white hover:bg-no-foreground',
+                              )}
+                            >
+                              <span className="uppercase opacity-80">{button.label}</span>
+                              <span className="text-sm leading-none tabular-nums">
+                                {formatButtonOdds(button.cents)}
+                              </span>
+                            </button>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  )}
+
+                  {shouldShowRedeemButton && (
+                    <div
+                      className="
+                        min-w-0 flex-1
+                        min-[1200px]:ml-auto min-[1200px]:w-[calc((248px-0.5rem)/2)] min-[1200px]:flex-none
+                      "
+                    >
+                      <div className="relative min-w-0 overflow-hidden rounded-lg pb-1.25">
+                        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-4 rounded-b-lg bg-primary" />
+                        <button
+                          type="button"
+                          data-sports-card-control="true"
+                          onClick={(event) => {
+                            event.stopPropagation()
+                            setRedeemDefaultConditionId(conditionId)
+                            setRedeemSectionKey('moneyline')
+                          }}
+                          className={`
+                            relative flex h-9 w-full translate-y-0 items-center justify-center rounded-lg bg-primary
+                            px-3 text-xs font-semibold text-primary-foreground shadow-sm transition-transform
+                            duration-150 ease-out
+                            hover:translate-y-px hover:bg-primary
+                            active:translate-y-0.5
+                          `}
+                        >
+                          Redeem
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <div className={cn('bg-card px-2.5', isOpen ? 'border-t pt-3' : 'pt-0')}>
+                  <SportsGameDetailsPanel
+                    card={activeCard}
+                    activeDetailsTab={activeTab}
+                    selectedButtonKey={selectedButtonKey}
+                    showBottomContent={isOpen}
+                    defaultGraphTimeRange="ALL"
+                    allowedConditionIds={new Set([conditionId])}
+                    showAboutTab
+                    aboutEvent={activeCard.event}
+                    showRedeemInPositions={activeCard.event.sports_ended === true}
+                    onOpenRedeemForCondition={handleOpenRedeemForCondition}
+                    oddsFormat={oddsFormat}
+                    onChangeTab={tab => setTabByAuxiliaryConditionId(current => ({ ...current, [conditionId]: tab }))}
+                    onSelectButton={(buttonKey, options) => {
+                      updateAuxiliarySelection(conditionId, buttonKey, options)
+                    }}
+                  />
+                </div>
+              </article>
+            )
+          })}
+        </div>
+      )
+
+  return (
+    <>
+      <div className="
+        min-[1200px]:grid min-[1200px]:h-full min-[1200px]:grid-cols-[minmax(0,1fr)_21.25rem] min-[1200px]:gap-6
+      "
+      >
+        <section
+          data-sports-scroll-pane="center"
+          className="min-w-0 min-[1200px]:min-h-0 min-[1200px]:overflow-y-auto min-[1200px]:pr-1 lg:ml-4"
+        >
+          <div className="mb-4">
+            <div className="relative mb-1 flex min-h-9 items-center justify-center">
+              <Link
+                href={`/sports/${sportSlug}/games`}
+                aria-label="Back to games"
+                className={cn(
+                  headerIconButtonClass,
+                  'absolute left-0 inline-flex size-8 items-center justify-center p-0 text-foreground md:size-9',
+                )}
+              >
+                <ChevronLeftIcon className="size-4 text-foreground" />
+              </Link>
+
+              <div
+                className="
+                  flex min-w-0 items-center justify-center gap-1 px-14 text-center text-sm text-muted-foreground
+                  sm:px-22
+                "
+              >
+                <Link href="/sports/live" className="hover:text-foreground">
+                  Sports
+                </Link>
+                <span className="opacity-60">·</span>
+                <Link href={`/sports/${sportSlug}/games`} className="truncate hover:text-foreground">
+                  {sportLabel}
+                </Link>
+              </div>
+
+              <div className="absolute right-0 flex items-center gap-1 text-foreground">
+                <EventBookmark event={heroCard.event} />
+                <SportsEventShareButton event={heroCard.event} />
+              </div>
+            </div>
+
+            <h1 className="text-center text-xl font-semibold text-foreground sm:text-2xl">
+              {eventTitle}
+            </h1>
+          </div>
+
+          <div className="mb-4 flex items-center gap-3">
+            <div className="h-px flex-1 bg-border/70" />
+            <div className="pointer-events-none flex items-center gap-2 text-sm text-muted-foreground select-none">
+              <SiteLogoIcon
+                logoSvg={site.logoSvg}
+                logoImageUrl={site.logoImageUrl}
+                alt={`${site.name} logo`}
+                className="
+                  pointer-events-none size-4 text-current select-none
+                  [&_svg]:size-4
+                  [&_svg_*]:fill-current [&_svg_*]:stroke-current
+                "
+                imageClassName="pointer-events-none size-4 object-contain select-none"
+                size={16}
+              />
+              <span className="font-medium select-none">{site.name}</span>
+            </div>
+            <div className="h-px flex-1 bg-border/70" />
+          </div>
+
+          {canWatchLivestream && (
+            <div className="mb-4 flex items-center justify-center">
+              <button
+                type="button"
+                onClick={() => openLivestream({
+                  url: heroCard.event.livestream_url!,
+                  title: heroCard.event.title || heroCard.title,
+                })}
+                className={`
+                  inline-flex cursor-pointer items-center gap-1.5 rounded-md border border-border/80 bg-background px-3
+                  py-1.5 text-xs font-medium text-muted-foreground transition-colors
+                  hover:bg-secondary/50 hover:text-foreground
+                `}
+              >
+                <SportsEventLiveStatusIcon
+                  className="size-3.5"
+                  muted={isCurrentEventLivestreamOpen}
+                />
+                <span>Watch Stream</span>
+              </button>
+            </div>
+          )}
+
+          <div className="mb-4 flex items-center justify-center gap-12 md:gap-14">
+            <div className="flex w-20 flex-col items-center gap-2">
+              <div className="pointer-events-none flex size-12 items-center justify-center select-none">
+                {team1?.logoUrl
+                  ? (
+                      <Image
+                        src={team1.logoUrl}
+                        alt={`${team1.name} logo`}
+                        width={48}
+                        height={48}
+                        sizes="48px"
+                        draggable={false}
+                        className="size-full object-contain object-center select-none"
+                      />
+                    )
+                  : (
+                      <div className="text-sm font-semibold text-muted-foreground">
+                        {team1?.abbreviation ?? '—'}
+                      </div>
+                    )}
+              </div>
+              <span className="text-base font-semibold text-foreground uppercase">{team1?.abbreviation ?? '—'}</span>
+            </div>
+
+            {showFinalScore || showLiveScore
+              ? (
+                  <div className="flex flex-col items-center">
+                    <div className="flex items-center gap-2 text-3xl leading-none font-semibold tabular-nums">
+                      <span
+                        className={team1Won
+                          ? 'text-foreground'
+                          : team2Won
+                            ? 'text-muted-foreground'
+                            : 'text-foreground'}
+                      >
+                        {team1Score ?? '—'}
+                      </span>
+                      <span className="text-muted-foreground">-</span>
+                      <span
+                        className={team2Won
+                          ? 'text-foreground'
+                          : team1Won
+                            ? 'text-muted-foreground'
+                            : 'text-foreground'}
+                      >
+                        {team2Score ?? '—'}
+                      </span>
+                    </div>
+                    {showFinalScore
+                      ? (
+                          <span className="mt-1 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+                            FINAL
+                          </span>
+                        )
+                      : (
+                          <span className="mt-1 text-xs font-semibold tracking-wide text-red-500 uppercase">
+                            LIVE
+                          </span>
+                        )}
+                  </div>
+                )
+              : (
+                  <div className="flex flex-col items-center">
+                    <span className="text-sm font-medium text-foreground">{timeLabel}</span>
+                    <span className="text-sm font-medium text-muted-foreground">{dayLabel}</span>
+                  </div>
+                )}
+
+            <div className="flex w-20 flex-col items-center gap-2">
+              <div className="pointer-events-none flex size-12 items-center justify-center select-none">
+                {team2?.logoUrl
+                  ? (
+                      <Image
+                        src={team2.logoUrl}
+                        alt={`${team2.name} logo`}
+                        width={48}
+                        height={48}
+                        sizes="48px"
+                        draggable={false}
+                        className="size-full object-contain object-center select-none"
+                      />
+                    )
+                  : (
+                      <div className="text-sm font-semibold text-muted-foreground">
+                        {team2?.abbreviation ?? '—'}
+                      </div>
+                    )}
+              </div>
+              <span className="text-base font-semibold text-foreground uppercase">{team2?.abbreviation ?? '—'}</span>
+            </div>
+          </div>
+
+          <div className="mb-4">
+            <div className="mb-2 flex items-center justify-between px-1">
+              <span className="text-sm font-semibold text-muted-foreground">
+                {formatVolume(heroCard.volume)}
+                {' '}
+                Vol.
+              </span>
+              <div className="pointer-events-none flex items-center gap-2 text-muted-foreground select-none">
+                <SiteLogoIcon
+                  logoSvg={site.logoSvg}
+                  logoImageUrl={site.logoImageUrl}
+                  alt={`${site.name} logo`}
+                  className="
+                    pointer-events-none size-4 text-current select-none
+                    [&_svg]:size-4
+                    [&_svg_*]:fill-current [&_svg_*]:stroke-current
+                  "
+                  imageClassName="pointer-events-none size-4 object-contain select-none"
+                  size={16}
+                />
+                <span className="text-base font-semibold select-none">{site.name}</span>
+              </div>
+            </div>
+            <SportsGameGraph
+              card={heroCard}
+              selectedMarketType="moneyline"
+              selectedConditionId={graphConditionId}
+              defaultTimeRange="ALL"
+              variant="sportsEventHero"
+            />
+          </div>
+
+          {marketViewTabs}
+          {marketPanelsContent}
 
           <div className="mt-8">
-            <EventTabs event={card.event} user={user ?? null} />
+            <EventTabs event={heroCard.event} user={user ?? null} />
           </div>
         </section>
 
@@ -1771,13 +2265,13 @@ export default function SportsEventCenter({
                 <div className="grid gap-6">
                   <EventOrderPanelForm
                     isMobile={false}
-                    event={card.event}
+                    event={activeCard.event}
                     oddsFormat={oddsFormat}
                     outcomeButtonStyleVariant="sports3d"
                     optimisticallyClaimedConditionIds={claimedConditionIds}
                     desktopMarketInfo={(
                       <SportsOrderPanelMarketInfo
-                        card={card}
+                        card={activeCard}
                         selectedButton={activeTradeHeaderContext?.button ?? activeTradeContext.button}
                         selectedOutcome={activeTradeHeaderContext?.outcome ?? activeTradeContext.outcome}
                         marketType={activeTradeHeaderContext?.button.marketType ?? activeTradeContext.button.marketType}
@@ -1804,13 +2298,13 @@ export default function SportsEventCenter({
 
       {isMobile && activeTradeContext && (
         <EventOrderPanelMobile
-          event={card.event}
+          event={activeCard.event}
           oddsFormat={oddsFormat}
           outcomeButtonStyleVariant="sports3d"
           optimisticallyClaimedConditionIds={claimedConditionIds}
           mobileMarketInfo={(
             <SportsOrderPanelMarketInfo
-              card={card}
+              card={activeCard}
               selectedButton={activeTradeHeaderContext?.button ?? activeTradeContext.button}
               selectedOutcome={activeTradeHeaderContext?.outcome ?? activeTradeContext.outcome}
               marketType={activeTradeHeaderContext?.button.marketType ?? activeTradeContext.button.marketType}
